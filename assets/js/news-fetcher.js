@@ -25,17 +25,63 @@
   const categoryChips = document.querySelectorAll('.chip[data-category]');
   const countDisplay = document.getElementById('news-count-display');
 
+  const DEFAULT_FALLBACK_ARTICLES = [
+    {
+      "id": "platform-launch-initiative",
+      "slug": "platform-launch-initiative",
+      "path": "news/platform-launch-initiative/index.html",
+      "image": "assets/images/marketplace-launch-banner.svg",
+      "title": "Platform Launch Initiative: Building the Largest Property Marketplace",
+      "subtitle": "Platform News & Announcements",
+      "category": "Platform Development",
+      "categorySlug": "platform-development",
+      "date": "September 2026",
+      "isoDate": "2026-09-01",
+      "readTime": "5 min read",
+      "featured": true,
+      "summary": "As part of our mission to create a comprehensive and trusted real estate marketplace, we have introduced a temporary property data acquisition strategy to provide users with meaningful and valuable content from day one.",
+      "status": "Active Platform Growth Initiative",
+      "badge": "Official Announcement",
+      "tags": ["Marketplace Launch", "Data Accuracy", "Roadmap", "Property Owners", "Agency Verification"]
+    }
+  ];
+
   // Initialize
   async function init() {
     if (!container) return;
+
+    // Check if any deleted articles exist in localStorage
+    let deletedSlugs = [];
+    try {
+      deletedSlugs = JSON.parse(localStorage.getItem('salama_deleted_articles') || '[]');
+    } catch (e) {
+      deletedSlugs = [];
+    }
+
+    // Clean initial pre-rendered static content if it matches deleted slugs
+    if (deletedSlugs.includes('platform-launch-initiative')) {
+      const staticCard = container.querySelector('.featured-card');
+      if (staticCard) staticCard.remove();
+    }
 
     renderSkeleton();
 
     try {
       // 1. Fetch articles manifest
-      const res = await fetch(manifestPath, { cache: 'no-cache' });
-      if (!res.ok) throw new Error('Could not load articles manifest');
-      const manifestArticles = await res.json();
+      let manifestArticles = [];
+      try {
+        const res = await fetch(manifestPath, { cache: 'no-cache' });
+        if (res.ok) {
+          manifestArticles = await res.json();
+        }
+      } catch (e) {
+        console.warn('Auto-fetcher note: manifest fetch offline or restricted, using fallback.');
+      }
+
+      // If manifest is empty or failed to load, fallback to DEFAULT_FALLBACK_ARTICLES
+      if (!manifestArticles || manifestArticles.length === 0) {
+        manifestArticles = DEFAULT_FALLBACK_ARTICLES.slice();
+      }
 
       // 2. Hydrate each article (fetch its HTML if full details are missing)
       const hydratedArticles = await Promise.all(
@@ -61,8 +107,14 @@
 
       const combined = mergeArticles(mergeArticles(hydratedArticles, ghArticles), localCreated);
 
+      // 5. Exclude deleted articles
+      allArticles = combined.filter(art => {
+        const slug = art.slug || art.id;
+        return !deletedSlugs.includes(slug);
+      });
+
       // Sort by date (newest first)
-      allArticles = combined.sort((a, b) => new Date(b.isoDate || b.date) - new Date(a.isoDate || a.date));
+      allArticles.sort((a, b) => new Date(b.isoDate || b.date) - new Date(a.isoDate || a.date));
 
       renderArticles();
       setupEventListeners();
@@ -197,6 +249,22 @@
 
   // Render fallback in case of local file:/// restrictions
   function renderFallbackNotice() {
+    let deletedSlugs = [];
+    try {
+      deletedSlugs = JSON.parse(localStorage.getItem('salama_deleted_articles') || '[]');
+    } catch (e) {}
+
+    if (deletedSlugs.includes('platform-launch-initiative')) {
+      container.innerHTML = `
+        <div class="callout-box" style="text-align: center; padding: 40px 20px;">
+          <h4 style="font-size: 1.15rem; color: var(--slate-700); margin-bottom: 8px;">No active announcements</h4>
+          <p style="color: var(--slate-500);">All announcements have been archived or removed by administrator.</p>
+        </div>
+      `;
+      if (countDisplay) countDisplay.innerText = 'Showing 0 updates';
+      return;
+    }
+
     container.innerHTML = `
       <div class="article-card featured-card">
         <div class="card-meta-top">

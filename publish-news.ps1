@@ -82,6 +82,113 @@ if (-not ($UserValid -and $PinValid)) {
 Write-Host "[Success] MFA Authenticated! Access granted." -ForegroundColor Green
 Write-Host ""
 
+# Admin Action Selection
+Write-Host "==========================================================" -ForegroundColor Cyan
+Write-Host "  SALAMA ESTATES - NEWS MANAGEMENT MENU                   " -ForegroundColor Cyan
+Write-Host "==========================================================" -ForegroundColor Cyan
+Write-Host "  1) Publish New Article & Generate Sharable Link"
+Write-Host "  2) List & Delete Existing Articles"
+Write-Host "  3) Exit"
+Write-Host ""
+$MenuChoice = Read-Host "Select option (1-3) [Default: 1]"
+if ([string]::IsNullOrWhiteSpace($MenuChoice)) { $MenuChoice = "1" }
+
+if ($MenuChoice -eq "3") {
+    Write-Host "Exiting News Studio." -ForegroundColor Gray
+    exit 0
+}
+
+# -------------------------------------------------------------
+# OPTION 2: LIST & DELETE EXISTING ARTICLES
+# -------------------------------------------------------------
+if ($MenuChoice -eq "2") {
+    $ArticlesJsonPath = Join-Path $ProjectRoot "news\articles.json"
+    $Articles = @()
+    if (Test-Path $ArticlesJsonPath) {
+        try {
+            $JsonRaw = Get-Content -Path $ArticlesJsonPath -Raw
+            $Articles = @($JsonRaw | ConvertFrom-Json)
+        } catch {
+            $Articles = @()
+        }
+    }
+
+    if ($Articles.Count -eq 0) {
+        Write-Host ""
+        Write-Host "[Notice] No articles found in news\articles.json." -ForegroundColor Yellow
+        exit 0
+    }
+
+    Write-Host ""
+    Write-Host "Current Articles Manifest:" -ForegroundColor Cyan
+    Write-Host "----------------------------------------------------------" -ForegroundColor Gray
+    for ($i = 0; $i -lt $Articles.Count; $i++) {
+        $art = $Articles[$i]
+        Write-Host " [$($i + 1)] $($art.title)" -ForegroundColor White
+        Write-Host "     Slug: news/$($art.slug) | Category: $($art.category) | Date: $($art.date)" -ForegroundColor Gray
+    }
+    Write-Host "----------------------------------------------------------" -ForegroundColor Gray
+    Write-Host ""
+    $DeleteIdxInput = Read-Host "Enter the number of the article to DELETE (or press Enter to cancel)"
+    if ([string]::IsNullOrWhiteSpace($DeleteIdxInput)) {
+        Write-Host "Operation cancelled." -ForegroundColor Yellow
+        exit 0
+    }
+
+    $DeleteIdx = [int]$DeleteIdxInput - 1
+    if ($DeleteIdx -lt 0 -or $DeleteIdx -ge $Articles.Count) {
+        Write-Host "[Error] Invalid selection." -ForegroundColor Red
+        exit 1
+    }
+
+    $TargetArticle = $Articles[$DeleteIdx]
+    $TargetSlug = $TargetArticle.slug
+
+    Write-Host ""
+    Write-Host "==========================================================" -ForegroundColor Red
+    Write-Host "  CONFIRM ARTICLE DELETION                                " -ForegroundColor Red
+    Write-Host "==========================================================" -ForegroundColor Red
+    Write-Host "Title:  $($TargetArticle.title)" -ForegroundColor White
+    Write-Host "Folder: news\$TargetSlug" -ForegroundColor White
+    Write-Host ""
+    $Confirm = Read-Host "Type 'DELETE' to permanently delete this article"
+    if ($Confirm -ne "DELETE") {
+        Write-Host "Deletion cancelled." -ForegroundColor Yellow
+        exit 0
+    }
+
+    # 1. Delete directory news/<slug>
+    $DirToDelete = Join-Path $ProjectRoot "news\$TargetSlug"
+    if (Test-Path $DirToDelete) {
+        Remove-Item -Path $DirToDelete -Recurse -Force
+        Write-Host "[Success] Deleted directory: news\$TargetSlug" -ForegroundColor Green
+    }
+
+    # 2. Update news/articles.json
+    $UpdatedArticles = @($Articles | Where-Object { $_.slug -ne $TargetSlug })
+    $UpdatedJson = $UpdatedArticles | ConvertTo-Json -Depth 5
+    Set-Content -Path $ArticlesJsonPath -Value $UpdatedJson -Encoding UTF8
+    Write-Host "[Success] Removed from news\articles.json" -ForegroundColor Green
+
+    # 3. Commit and Push
+    Write-Host ""
+    $GitPush = Read-Host "Do you want to commit & push this deletion to GitHub? (Y/N) [Default: Y]"
+    if ([string]::IsNullOrWhiteSpace($GitPush) -or $GitPush -eq "Y" -or $GitPush -eq "y") {
+        git add -A
+        git commit -m "Delete news article: $($TargetArticle.title)"
+        git push origin master
+        git push origin main
+        Write-Host "[Success] Pushed deletion to origin/master and origin/main!" -ForegroundColor Green
+    }
+
+    Write-Host ""
+    Write-Host "Article successfully removed from Salama Estates!" -ForegroundColor Green
+    exit 0
+}
+
+# -------------------------------------------------------------
+# OPTION 1: PUBLISH NEW ARTICLE
+# -------------------------------------------------------------
 # 2. Gather Article Information
 $Title = Read-Host "Article Title (e.g. October 2026: Agency Verification Program)"
 if ([string]::IsNullOrWhiteSpace($Title)) {
@@ -219,7 +326,8 @@ if ($GitPush -eq "Y" -or $GitPush -eq "y") {
     git add .
     git commit -m "Publish news: $Title"
     git push origin master
-    Write-Host "[Success] Pushed to GitHub!" -ForegroundColor Green
+    git push origin main
+    Write-Host "[Success] Pushed to GitHub master and main!" -ForegroundColor Green
 }
 
 # 6. Generate Sharable Link
