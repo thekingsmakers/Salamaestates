@@ -348,19 +348,34 @@
       return;
     }
 
-    function resolveImageLink(imgPath) {
-      if (!imgPath) return '';
-      if (imgPath.startsWith('http://') || imgPath.startsWith('https://') || imgPath.startsWith('data:')) {
-        return imgPath;
+    function getRootPrefix() {
+      const p = (window.location.pathname || '').replace(/\\/g, '/');
+      if (p.includes('/news/') && !p.endsWith('/news/') && !p.endsWith('/news/index.html')) {
+        return '../../';
       }
-      if (window.location.pathname.includes('/news/')) {
-        if (imgPath.startsWith('assets/')) return '../' + imgPath;
-        if (imgPath.startsWith('../')) return imgPath;
-        return '../' + imgPath;
+      if (p.includes('/news') || p.endsWith('/news')) {
+        return '../';
       }
-      if (imgPath.startsWith('./')) return imgPath;
-      return './' + imgPath;
+      return './';
     }
+
+    function resolveImageLink(imgPath) {
+      if (!imgPath || typeof imgPath !== 'string') return '';
+      const trimmed = imgPath.trim();
+      if (!trimmed) return '';
+
+      // Direct external URL or inline data URI
+      if (trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('data:') || trimmed.startsWith('//')) {
+        return trimmed;
+      }
+
+      // Strip any leading ./ or ../ or /
+      const clean = trimmed.replace(/^(\.\.\/)+/, '').replace(/^\.\//, '').replace(/^\//, '');
+      const prefix = getRootPrefix();
+      return prefix + clean;
+    }
+
+    const fallbackBanner = resolveImageLink('assets/images/marketplace-launch-banner.svg');
 
     container.innerHTML = filtered
       .map((art) => {
@@ -407,7 +422,7 @@
             <article class="article-card ${isFeatured}" id="${art.slug || art.id || ''}">
               <div class="article-card-with-thumb">
                 <div class="article-card-thumb-wrap">
-                  <img src="${imgUrl}" alt="${art.title}" class="article-card-thumb-img" loading="lazy">
+                  <img src="${imgUrl}" alt="${art.title}" class="article-card-thumb-img" loading="lazy" onerror="this.onerror=null; this.src='${fallbackBanner}';">
                 </div>
                 <div>
                   ${cardContent}

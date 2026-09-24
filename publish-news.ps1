@@ -87,21 +87,169 @@ Write-Host "==========================================================" -Foregro
 Write-Host "  SALAMA ESTATES - NEWS MANAGEMENT MENU                   " -ForegroundColor Cyan
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host "  1) Publish New Article & Generate Sharable Link"
-Write-Host "  2) List & Delete Existing Articles"
-Write-Host "  3) Exit"
+Write-Host "  2) Edit an Existing Article"
+Write-Host "  3) List & Delete Existing Articles"
+Write-Host "  4) Exit"
 Write-Host ""
-$MenuChoice = Read-Host "Select option (1-3) [Default: 1]"
+$MenuChoice = Read-Host "Select option (1-4) [Default: 1]"
 if ([string]::IsNullOrWhiteSpace($MenuChoice)) { $MenuChoice = "1" }
 
-if ($MenuChoice -eq "3") {
+if ($MenuChoice -eq "4") {
     Write-Host "Exiting News Studio." -ForegroundColor Gray
     exit 0
 }
 
 # -------------------------------------------------------------
-# OPTION 2: LIST & DELETE EXISTING ARTICLES
+# OPTION 2: EDIT AN EXISTING ARTICLE
 # -------------------------------------------------------------
 if ($MenuChoice -eq "2") {
+    $ArticlesJsonPath = Join-Path $ProjectRoot "news\articles.json"
+    $Articles = @()
+    if (Test-Path $ArticlesJsonPath) {
+        try {
+            $JsonRaw = Get-Content -Path $ArticlesJsonPath -Raw
+            $Articles = @($JsonRaw | ConvertFrom-Json)
+        } catch {
+            $Articles = @()
+        }
+    }
+
+    if ($Articles.Count -eq 0) {
+        Write-Host ""
+        Write-Host "[Notice] No articles found in news\articles.json." -ForegroundColor Yellow
+        exit 0
+    }
+
+    Write-Host ""
+    Write-Host "Current Articles Manifest:" -ForegroundColor Cyan
+    Write-Host "----------------------------------------------------------" -ForegroundColor Gray
+    for ($i = 0; $i -lt $Articles.Count; $i++) {
+        $art = $Articles[$i]
+        Write-Host " [$($i + 1)] $($art.title)" -ForegroundColor White
+        Write-Host "     Slug: news/$($art.slug) | Category: $($art.category) | Date: $($art.date)" -ForegroundColor Gray
+    }
+    Write-Host "----------------------------------------------------------" -ForegroundColor Gray
+    Write-Host ""
+    $EditIdxInput = Read-Host "Enter the number of the article to EDIT (or press Enter to cancel)"
+    if ([string]::IsNullOrWhiteSpace($EditIdxInput)) {
+        Write-Host "Operation cancelled." -ForegroundColor Yellow
+        exit 0
+    }
+
+    $EditIdx = [int]$EditIdxInput - 1
+    if ($EditIdx -lt 0 -or $EditIdx -ge $Articles.Count) {
+        Write-Host "[Error] Invalid selection." -ForegroundColor Red
+        exit 1
+    }
+
+    $TargetArticle = $Articles[$EditIdx]
+    $OldSlug = $TargetArticle.slug
+
+    Write-Host ""
+    Write-Host "==========================================================" -ForegroundColor Cyan
+    Write-Host "  EDIT ARTICLE: $($TargetArticle.title)" -ForegroundColor Cyan
+    Write-Host "==========================================================" -ForegroundColor Cyan
+    Write-Host "[Tip: Press Enter without typing to keep existing value]" -ForegroundColor Gray
+    Write-Host ""
+
+    $NewTitleInput = Read-Host "Title [$($TargetArticle.title)]"
+    $NewTitle = if ([string]::IsNullOrWhiteSpace($NewTitleInput)) { $TargetArticle.title } else { $NewTitleInput }
+
+    $NewCatInput = Read-Host "Category [$($TargetArticle.category)]"
+    $NewCategory = if ([string]::IsNullOrWhiteSpace($NewCatInput)) { $TargetArticle.category } else { $NewCatInput }
+
+    $NewDateInput = Read-Host "Publish Date [$($TargetArticle.date)]"
+    $NewDate = if ([string]::IsNullOrWhiteSpace($NewDateInput)) { $TargetArticle.date } else { $NewDateInput }
+
+    $NewSummaryInput = Read-Host "Summary [$($TargetArticle.summary)]"
+    $NewSummary = if ([string]::IsNullOrWhiteSpace($NewSummaryInput)) { $TargetArticle.summary } else { $NewSummaryInput }
+
+    $CurImg = if ($TargetArticle.image) { $TargetArticle.image } else { "assets/images/marketplace-launch-banner.svg" }
+    $NewImgInput = Read-Host "Hero Image [$CurImg]"
+    $NewImage = if ([string]::IsNullOrWhiteSpace($NewImgInput)) { $CurImg } else { $NewImgInput }
+
+    # Update article object
+    $TargetArticle.title = $NewTitle
+    $TargetArticle.category = $NewCategory
+    $TargetArticle.categorySlug = $NewCategory.ToLower() -replace '[^\w]', '-'
+    $TargetArticle.date = $NewDate
+    $TargetArticle.summary = $NewSummary
+    $TargetArticle.image = $NewImage
+
+    # Save to news/articles.json
+    $UpdatedJson = $Articles | ConvertTo-Json -Depth 5
+    Set-Content -Path $ArticlesJsonPath -Value $UpdatedJson -Encoding UTF8
+    Write-Host "[Success] Updated news\articles.json" -ForegroundColor Green
+
+    # Update HTML file if exists
+    $ArticleHtmlPath = Join-Path $ProjectRoot "news\$OldSlug\index.html"
+    if (Test-Path $ArticleHtmlPath) {
+        $Html = Get-Content -Path $ArticleHtmlPath -Raw -Encoding UTF8
+        $Html = [System.Text.RegularExpressions.Regex]::Replace($Html, '<title>.*?</title>', "<title>$NewTitle - Salama Estates</title>")
+        $Html = [System.Text.RegularExpressions.Regex]::Replace($Html, '<h1 class="article-main-title">[\s\S]*?</h1>', "<h1 class=`"article-main-title`">$NewTitle</h1>")
+        $Html = [System.Text.RegularExpressions.Regex]::Replace($Html, '<span class="badge-tag badge-date">[\s\S]*?</span>', "<span class=`"badge-tag badge-date`">$NewDate</span>")
+        $Html = [System.Text.RegularExpressions.Regex]::Replace($Html, '<span class="badge-tag badge-primary">[\s\S]*?</span>', "<span class=`"badge-tag badge-primary`">$NewCategory</span>")
+        
+        $ResolvedImg = $NewImage
+        if ($ResolvedImg -notmatch '^(https?:\/\/|data:|\.\.\/)') {
+            $ResolvedImg = "../../" + ($ResolvedImg -replace '^\.?\/?', '')
+        }
+        
+        if ($Html -match '<div style="margin-bottom: 2rem; border-radius: 12px;') {
+            $Html = [System.Text.RegularExpressions.Regex]::Replace($Html, '<div style="margin-bottom: 2rem; border-radius: 12px;[\s\S]*?</div>\s*</div>', @"
+<div style="margin-bottom: 2rem; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.06); max-height: 440px; background: #f8fafc;">
+          <img src="$ResolvedImg" alt="$NewTitle" style="width: 100%; height: 100%; object-fit: cover; max-height: 440px; display: block;" onerror="this.onerror=null; this.src='../../assets/images/marketplace-launch-banner.svg';">
+        </div>
+"@)
+        }
+        Set-Content -Path $ArticleHtmlPath -Value $Html -Encoding UTF8
+        Write-Host "[Success] Updated HTML: news\$OldSlug\index.html" -ForegroundColor Green
+    }
+
+    # Commit and Push
+    Write-Host ""
+    $GitPush = Read-Host "Do you want to commit & push this update to GitHub? (Y/N) [Default: Y]"
+    if ([string]::IsNullOrWhiteSpace($GitPush) -or $GitPush -eq "Y" -or $GitPush -eq "y") {
+        git add -A
+        git commit -m "Update news article: $NewTitle"
+        git push origin master
+        git push origin main
+        Write-Host "[Success] Pushed update to origin/master and origin/main!" -ForegroundColor Green
+    }
+
+    $GhUser = "thekingsmakers"
+    $GhRepo = "Salamaestates"
+    try {
+        $RemoteUrl = git config --get remote.origin.url
+        if ($RemoteUrl -match "github\.com[:/]([^/]+)/([^/\.]+)") {
+            $GhUser = $Matches[1]
+            $GhRepo = $Matches[2]
+        }
+    } catch {}
+
+    $PublicUrl = "https://$GhUser.github.io/$GhRepo/news/$OldSlug/"
+    try {
+        Set-Clipboard -Value $PublicUrl
+        $CopiedMsg = "(Copied to Clipboard!)"
+    } catch {
+        $CopiedMsg = ""
+    }
+
+    Write-Host ""
+    Write-Host "==========================================================" -ForegroundColor Green
+    Write-Host "  ARTICLE UPDATED SUCCESSFULLY!                           " -ForegroundColor Green
+    Write-Host "==========================================================" -ForegroundColor Green
+    Write-Host "Live Sharable Link: " -NoNewline -ForegroundColor Yellow
+    Write-Host $PublicUrl -ForegroundColor Cyan
+    Write-Host "   $CopiedMsg" -ForegroundColor Magenta
+    Write-Host ""
+    exit 0
+}
+
+# -------------------------------------------------------------
+# OPTION 3: LIST & DELETE EXISTING ARTICLES
+# -------------------------------------------------------------
+if ($MenuChoice -eq "3") {
     $ArticlesJsonPath = Join-Path $ProjectRoot "news\articles.json"
     $Articles = @()
     if (Test-Path $ArticlesJsonPath) {
@@ -233,6 +381,9 @@ if ([string]::IsNullOrWhiteSpace($Summary)) {
 
 $Quote = Read-Host "Impact Quote (Optional, press Enter to skip)"
 
+$ImgInput = Read-Host "Hero Image Path [Press Enter for: assets/images/marketplace-launch-banner.svg]"
+$Image = if ([string]::IsNullOrWhiteSpace($ImgInput)) { "assets/images/marketplace-launch-banner.svg" } else { $ImgInput }
+
 # 3. Create the Directory and index.html
 $TargetDir = Join-Path $ProjectRoot "news\$Slug"
 if (Test-Path $TargetDir) {
@@ -264,6 +415,17 @@ $HtmlContent = $HtmlContent -replace '<span>Official Notice Template</span>', "<
 
 $SummaryReplacement = "<p style=`"font-size: 1.15rem; color: var(--slate-800); font-weight: 500; line-height: 1.7;`">$Summary</p>"
 $HtmlContent = $HtmlContent -replace '<p style="font-size: 1\.15rem; color: var\(--slate-800\); font-weight: 500; line-height: 1\.7;">[\s\S]*?</p>', $SummaryReplacement
+
+$ResolvedImg = $Image
+if ($ResolvedImg -notmatch '^(https?:\/\/|data:|\.\.\/)') {
+    $ResolvedImg = "../../" + ($ResolvedImg -replace '^\.?\/?', '')
+}
+$HeroImgTag = @"
+        <div style="margin-bottom: 2rem; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.06); max-height: 440px; background: #f8fafc;">
+          <img src="$ResolvedImg" alt="$Title" style="width: 100%; height: 100%; object-fit: cover; max-height: 440px; display: block;" onerror="this.onerror=null; this.src='../../assets/images/marketplace-launch-banner.svg';">
+        </div>
+"@
+$HtmlContent = $HtmlContent -replace '</header>', "</header>`n$HeroImgTag"
 
 if (-not [string]::IsNullOrWhiteSpace($Quote)) {
     $QuoteBlock = @"
@@ -299,6 +461,7 @@ $NewArticle = [PSCustomObject]@{
     id           = $Slug
     slug         = $Slug
     path         = "news/$Slug/index.html"
+    image        = $Image
     title        = $Title
     subtitle     = "Platform Announcement"
     category     = $Category

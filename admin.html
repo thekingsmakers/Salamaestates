@@ -351,6 +351,18 @@
 
     <!-- TAB 1: CREATE ARTICLE -->
     <div id="tab-create">
+      <!-- Edit Mode Banner -->
+      <div id="edit-mode-banner" style="display: none; background: #ECFDF5; border: 1px solid #A7F3D0; border-radius: var(--radius-md); padding: 16px 20px; margin-bottom: 20px; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; box-shadow: var(--shadow-sm);">
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+          <span class="badge-tag badge-status" style="background: #10B981; color: #fff; font-weight: 700; font-size: 0.82rem;">✏️ Edit Mode Active</span>
+          <span style="font-size: 0.95rem; color: #065F46; font-weight: 600;">Modifying: <span id="edit-article-name" style="font-weight: 700; color: #064E3B;"></span></span>
+          <code id="edit-article-slug" style="font-size: 0.8rem; background: #D1FAE5; padding: 2px 8px; border-radius: 4px; color: #065F46;"></code>
+        </div>
+        <button type="button" class="action-btn-outline" style="font-size: 0.82rem; padding: 6px 14px; background: #fff; border-color: #6EE7B7; color: #065F46; font-weight: 600;" onclick="cancelEditMode()">
+          ✕ Cancel Edit &amp; Create New
+        </button>
+      </div>
+
       <form id="article-builder-form" onsubmit="handlePublish(event)">
         
         <div class="admin-card">
@@ -518,7 +530,7 @@
           </p>
 
           <div style="display: flex; gap: 14px; flex-wrap: wrap;">
-            <button type="submit" class="action-btn">
+            <button type="submit" id="publish-submit-btn" class="action-btn">
               Publish &amp; Generate Sharable Link &rarr;
             </button>
             <button type="button" class="action-btn-outline" onclick="saveDirectlyToDisk()">
@@ -528,7 +540,7 @@
 
           <!-- SHARABLE LINK OUTPUT BOX -->
           <div id="sharable-link-box" class="link-output-box">
-            <h3 style="color: var(--teal-900); font-size: 1.2rem; margin-bottom: 4px;">
+            <h3 id="sharable-link-title" style="color: var(--teal-900); font-size: 1.2rem; margin-bottom: 4px;">
               Article Published Successfully!
             </h3>
             <p style="font-size: 0.9rem; color: var(--teal-800);">
@@ -665,9 +677,34 @@
 
   <script src="assets/js/main.js"></script>
   <script>
+    let currentEditingSlug = null;
     let generatedArticleData = null;
     let generatedHtmlContent = '';
     let featuredImageData = '';
+
+    // Resolves image paths for display in admin.html (workspace root)
+    function resolveAdminImage(imgPath) {
+      if (!imgPath || typeof imgPath !== 'string') return 'assets/images/marketplace-launch-banner.svg';
+      const trimmed = imgPath.trim();
+      if (!trimmed) return 'assets/images/marketplace-launch-banner.svg';
+      if (trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('data:') || trimmed.startsWith('//')) {
+        return trimmed;
+      }
+      const clean = trimmed.replace(/^(\.\.\/)+/, '').replace(/^\.\//, '').replace(/^\//, '');
+      return clean;
+    }
+
+    // Resolves image paths for insertion into news/<slug>/index.html (2 levels deep)
+    function resolveArticlePageImage(imgPath) {
+      if (!imgPath || typeof imgPath !== 'string') return '';
+      const trimmed = imgPath.trim();
+      if (!trimmed) return '';
+      if (trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('data:') || trimmed.startsWith('//')) {
+        return trimmed;
+      }
+      const clean = trimmed.replace(/^(\.\.\/)+/, '').replace(/^\.\//, '').replace(/^\//, '');
+      return '../../' + clean;
+    }
 
     // Image upload & URL handlers
     function handleImageUrlInput(url) {
@@ -675,7 +712,7 @@
       const previewBox = document.getElementById('img-preview-box');
       const previewImg = document.getElementById('img-preview');
       if (featuredImageData) {
-        previewImg.src = featuredImageData;
+        previewImg.src = resolveAdminImage(featuredImageData);
         previewBox.style.display = 'block';
       } else {
         previewBox.style.display = 'none';
@@ -705,29 +742,34 @@
     }
 
     // Gallery builder handlers
-    function addGalleryPhoto() {
-      const id = 'gal-' + Date.now();
+    function addGalleryPhoto(caption = '', src = '') {
+      const id = 'gal-' + Date.now() + Math.random().toString(36).substr(2, 4);
       const container = document.getElementById('gallery-container');
       const div = document.createElement('div');
       div.className = 'section-block';
       div.id = id;
+      const safeCaption = (caption || '').replace(/"/g, '&quot;');
+      const safeSrc = (src && !src.startsWith('data:')) ? src : '';
       div.innerHTML = `
         <button type="button" onclick="document.getElementById('${id}').remove()" style="position: absolute; top: 12px; right: 12px; background: none; border: none; color: var(--red-600); cursor: pointer; font-size: 0.85rem; font-weight: 600;">&times; Remove Photo</button>
         <div class="grid-2">
           <div class="form-group">
             <label>Photo Caption / Description</label>
-            <input type="text" class="search-input gal-caption" placeholder="e.g. Architectural Rendering of Marketplace Center" style="padding-left: 14px;">
+            <input type="text" class="search-input gal-caption" placeholder="e.g. Architectural Rendering of Marketplace Center" value="${safeCaption}" style="padding-left: 14px;">
           </div>
           <div class="form-group">
             <label>Photo Source (URL or File)</label>
-            <input type="text" class="search-input gal-url" placeholder="Paste image URL or relative path" style="padding-left: 14px; margin-bottom: 6px;" oninput="previewGalPhoto(this, '${id}')">
+            <input type="text" class="search-input gal-url" placeholder="Paste image URL or relative path" value="${safeSrc}" style="padding-left: 14px; margin-bottom: 6px;" oninput="previewGalPhoto(this, '${id}')">
             <input type="file" accept="image/*" class="search-input gal-file" style="padding: 6px;" onchange="handleGalFileUpload(event, '${id}')">
           </div>
         </div>
-        <div class="gal-preview-container" style="display: none; margin-top: 10px;">
-          <img class="gal-preview-img" src="" alt="Gallery Preview" style="max-height: 140px; border-radius: 6px; border: 1px solid var(--color-border); object-fit: cover;">
+        <div class="gal-preview-container" style="${src ? 'display: block;' : 'display: none;'} margin-top: 10px;">
+          <img class="gal-preview-img" src="${resolveAdminImage(src)}" alt="Gallery Preview" style="max-height: 140px; border-radius: 6px; border: 1px solid var(--color-border); object-fit: cover;" onerror="this.style.display='none';">
         </div>
       `;
+      if (src && src.startsWith('data:')) {
+        div.querySelector('.gal-url').dataset.dataUri = src;
+      }
       container.appendChild(div);
     }
 
@@ -736,7 +778,7 @@
       const container = box.querySelector('.gal-preview-container');
       const img = box.querySelector('.gal-preview-img');
       if (input.value.trim()) {
-        img.src = input.value.trim();
+        img.src = resolveAdminImage(input.value.trim());
         container.style.display = 'block';
       } else {
         container.style.display = 'none';
@@ -1065,20 +1107,21 @@
 
     // Section builder
     let sectionCount = 1;
-    function addSection() {
+    function addSection(heading = '', body = '') {
       sectionCount++;
       const container = document.getElementById('sections-container');
       const div = document.createElement('div');
       div.className = 'section-block';
+      const safeHeading = (heading || '').replace(/"/g, '&quot;');
       div.innerHTML = `
         <button type="button" onclick="this.parentElement.remove()" style="position: absolute; top: 12px; right: 12px; background: none; border: none; color: var(--red-600); cursor: pointer; font-size: 0.85rem; font-weight: 600;">&times; Remove</button>
         <div class="form-group">
           <label>Section ${sectionCount} Heading</label>
-          <input type="text" class="search-input section-heading" style="padding-left: 14px;" placeholder="e.g. Next Steps &amp; Action Items" required>
+          <input type="text" class="search-input section-heading" style="padding-left: 14px;" placeholder="e.g. Next Steps &amp; Action Items" value="${safeHeading}" required>
         </div>
         <div class="form-group">
           <label>Section ${sectionCount} Body Text</label>
-          <textarea class="search-input section-body" style="padding: 12px 14px; min-height: 100px; resize: vertical;" placeholder="Write section details..." required></textarea>
+          <textarea class="search-input section-body" style="padding: 12px 14px; min-height: 100px; resize: vertical;" placeholder="Write section details..." required>${body || ''}</textarea>
         </div>
       `;
       container.appendChild(div);
@@ -1124,9 +1167,10 @@
         </blockquote>
       ` : '';
 
-      const heroMediaHtml = data.image ? `
+      const heroImgSrc = resolveArticlePageImage(data.image);
+      const heroMediaHtml = heroImgSrc ? `
         <div class="article-hero-media" style="margin: 24px 0 32px;">
-          <img src="${data.image}" alt="${data.title}" style="width: 100%; max-height: 480px; object-fit: cover; border-radius: var(--radius-md); border: 1px solid var(--color-border); box-shadow: var(--shadow-sm);">
+          <img src="${heroImgSrc}" alt="${data.title}" class="article-hero-img" loading="eager" onerror="this.onerror=null; this.src='../../assets/images/marketplace-launch-banner.svg';">
         </div>
       ` : '';
 
@@ -1135,14 +1179,17 @@
           <h2>Photo Gallery &amp; Visual Updates</h2>
           <p style="color: var(--slate-600); margin-bottom: 20px;">Photographic documentation and media releases associated with this announcement.</p>
           <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px;">
-            ${data.gallery.map(item => `
-              <figure style="margin: 0; background: var(--slate-50); border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow: hidden; box-shadow: var(--shadow-sm);">
-                <img src="${item.src}" alt="${item.caption}" style="width: 100%; height: 220px; object-fit: cover; display: block;" loading="lazy">
-                <figcaption style="padding: 12px 14px; font-size: 0.88rem; color: var(--slate-700); font-weight: 500; border-top: 1px solid var(--color-border-subtle);">
-                  ${item.caption}
-                </figcaption>
-              </figure>
-            `).join('')}
+            ${data.gallery.map(item => {
+              const galSrc = resolveArticlePageImage(item.src);
+              return `
+                <figure style="margin: 0; background: var(--slate-50); border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow: hidden; box-shadow: var(--shadow-sm);">
+                  <img src="${galSrc}" alt="${item.caption}" style="width: 100%; height: 220px; object-fit: cover; display: block;" loading="lazy" onerror="this.style.display='none';">
+                  <figcaption style="padding: 12px 14px; font-size: 0.88rem; color: var(--slate-700); font-weight: 500; border-top: 1px solid var(--color-border-subtle);">
+                    ${item.caption}
+                  </figcaption>
+                </figure>
+              `;
+            }).join('')}
           </div>
         </section>
       ` : '';
@@ -1369,17 +1416,39 @@
         if (stored) customArticles = JSON.parse(stored);
       } catch (err) {}
 
+      // If we were editing and renamed the slug, remove the old slug
+      if (currentEditingSlug && currentEditingSlug !== slug) {
+        customArticles = customArticles.filter(a => a.slug !== currentEditingSlug && a.id !== currentEditingSlug);
+        if (projectDirHandle) {
+          try {
+            projectDirHandle.getDirectoryHandle('news', { create: false }).then(h => h.removeEntry(currentEditingSlug, { recursive: true }));
+          } catch (e) {}
+        }
+      }
+
       // Update or add
-      customArticles = customArticles.filter(a => a.slug !== slug);
+      customArticles = customArticles.filter(a => a.slug !== slug && a.id !== slug);
       customArticles.unshift(articleObj);
       localStorage.setItem('salama_custom_articles', JSON.stringify(customArticles));
 
       // If previously marked deleted, un-delete it
       try {
         let deleted = JSON.parse(localStorage.getItem('salama_deleted_articles') || '[]');
-        deleted = deleted.filter(s => s !== slug);
+        deleted = deleted.filter(s => s !== slug && s !== currentEditingSlug);
         localStorage.setItem('salama_deleted_articles', JSON.stringify(deleted));
       } catch (e) {}
+
+      const wasEditing = !!currentEditingSlug;
+      currentEditingSlug = null;
+      const banner = document.getElementById('edit-mode-banner');
+      if (banner) banner.style.display = 'none';
+      const submitBtn = document.getElementById('publish-submit-btn');
+      if (submitBtn) submitBtn.innerHTML = 'Publish &amp; Generate Sharable Link &rarr;';
+
+      const linkBoxTitle = document.getElementById('sharable-link-title');
+      if (linkBoxTitle) {
+        linkBoxTitle.innerText = wasEditing ? 'Article Updated Successfully!' : 'Article Published Successfully!';
+      }
 
       if (typeof loadExistingArticlesList === 'function') {
         loadExistingArticlesList();
@@ -1685,6 +1754,148 @@
       renderExistingArticles(filtered);
     }
 
+    // Edit Existing Article
+    async function editArticle(slug) {
+      let art = allLoadedArticles.find(a => (a.slug === slug || a.id === slug));
+      if (!art) {
+        const all = await getCurrentActiveArticles();
+        art = all.find(a => (a.slug === slug || a.id === slug));
+      }
+
+      if (!art) {
+        alert('Could not locate article details for slug: ' + slug);
+        return;
+      }
+
+      currentEditingSlug = art.slug || art.id;
+
+      // 1. Switch to Create/Edit Tab
+      switchTab('create');
+
+      // 2. Show Edit Banner & Update Submit Button
+      const banner = document.getElementById('edit-mode-banner');
+      if (banner) {
+        banner.style.display = 'flex';
+        document.getElementById('edit-article-name').innerText = art.title;
+        document.getElementById('edit-article-slug').innerText = `news/${currentEditingSlug}`;
+      }
+      const submitBtn = document.getElementById('publish-submit-btn');
+      if (submitBtn) {
+        submitBtn.innerHTML = '💾 Update &amp; Save Changes &rarr;';
+      }
+
+      // 3. Populate metadata fields
+      document.getElementById('news-title').value = art.title || '';
+      const slugInput = document.getElementById('news-slug');
+      slugInput.value = art.slug || '';
+      slugInput.dataset.manual = 'true';
+
+      const catSelect = document.getElementById('news-category');
+      if (catSelect) {
+        let found = false;
+        for (let i = 0; i < catSelect.options.length; i++) {
+          if (catSelect.options[i].value.toLowerCase() === (art.category || '').toLowerCase()) {
+            catSelect.selectedIndex = i;
+            found = true;
+            break;
+          }
+        }
+        if (!found && art.category) {
+          const opt = document.createElement('option');
+          opt.value = art.category;
+          opt.text = art.category;
+          opt.selected = true;
+          catSelect.appendChild(opt);
+        }
+      }
+
+      document.getElementById('news-date').value = art.date || '';
+      if (document.getElementById('news-readtime')) {
+        document.getElementById('news-readtime').value = art.readTime || '5 min read';
+      }
+      if (document.getElementById('news-badge')) {
+        document.getElementById('news-badge').value = art.badge || 'Official Announcement';
+      }
+      document.getElementById('news-summary').value = art.summary || '';
+      document.getElementById('news-quote').value = art.quote || '';
+
+      // 4. Featured Image
+      featuredImageData = art.image || '';
+      const imgUrlInput = document.getElementById('news-img-url');
+      if (imgUrlInput) {
+        imgUrlInput.value = (art.image && !art.image.startsWith('data:')) ? art.image : '';
+      }
+      const previewBox = document.getElementById('img-preview-box');
+      const previewImg = document.getElementById('img-preview');
+      if (featuredImageData) {
+        previewImg.src = resolveAdminImage(featuredImageData);
+        previewBox.style.display = 'block';
+      } else {
+        previewBox.style.display = 'none';
+      }
+
+      // 5. Populate Sections
+      const container = document.getElementById('sections-container');
+      container.innerHTML = '';
+      sectionCount = 0;
+
+      let sections = art.sections;
+      if (!sections || sections.length === 0) {
+        try {
+          const res = await fetch(`news/${currentEditingSlug}/index.html`);
+          if (res.ok) {
+            const htmlText = await res.text();
+            const doc = new DOMParser().parseFromString(htmlText, 'text/html');
+            const secNodes = doc.querySelectorAll('section[id^="section-"]');
+            if (secNodes.length > 0) {
+              sections = Array.from(secNodes).map(sec => {
+                const h = sec.querySelector('h2, h3');
+                const heading = h ? h.innerText.replace(/^\d+[\.\)]\s*/, '') : 'Section';
+                const paragraphs = Array.from(sec.querySelectorAll('p')).map(p => p.innerHTML.replace(/<br\s*[\/]?>/gi, '\n')).join('\n\n');
+                return { heading, body: paragraphs };
+              });
+            }
+            if (!art.quote) {
+              const bq = doc.querySelector('blockquote');
+              if (bq) document.getElementById('news-quote').value = bq.innerText.replace(/^[“"”\s]+|[“"”\s]+$/g, '');
+            }
+          }
+        } catch (e) {
+          console.warn('Could not parse sections from local file', e);
+        }
+      }
+
+      if (sections && sections.length > 0) {
+        sections.forEach(s => addSection(s.heading, s.body));
+      } else {
+        addSection('Overview & Strategic Context', art.summary || '');
+      }
+
+      // 6. Gallery
+      const galContainer = document.getElementById('gallery-container');
+      galContainer.innerHTML = '';
+      if (art.gallery && art.gallery.length > 0) {
+        art.gallery.forEach(item => addGalleryPhoto(item.caption, item.src));
+      }
+
+      window.scrollTo({ top: 120, behavior: 'smooth' });
+    }
+
+    function cancelEditMode() {
+      currentEditingSlug = null;
+      const banner = document.getElementById('edit-mode-banner');
+      if (banner) banner.style.display = 'none';
+      const submitBtn = document.getElementById('publish-submit-btn');
+      if (submitBtn) submitBtn.innerHTML = 'Publish &amp; Generate Sharable Link &rarr;';
+      document.getElementById('article-builder-form').reset();
+      clearFeaturedImage();
+      const container = document.getElementById('sections-container');
+      container.innerHTML = '';
+      sectionCount = 0;
+      addSection();
+      document.getElementById('gallery-container').innerHTML = '';
+    }
+
     function renderExistingArticles(articles) {
       const container = document.getElementById('existing-articles-list');
       const countBadge = document.getElementById('existing-articles-count');
@@ -1729,28 +1940,34 @@
         const category = art.category || 'General';
         const date = art.date || 'Active';
         const badge = art.badge || (art.featured ? 'Featured' : 'Published');
+        const thumbUrl = resolveAdminImage(art.image);
 
         return `
           <div class="existing-article-card" style="background: #ffffff; border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 20px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 14px;">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px;">
-              <div style="flex: 1; min-width: 280px;">
-                <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 6px; flex-wrap: wrap;">
-                  <span class="card-category">${category}</span>
-                  <span class="badge-tag badge-status" style="font-size: 0.75rem;">${badge}</span>
-                  <span style="font-size: 0.82rem; color: var(--slate-500); display: inline-flex; align-items: center; gap: 4px;">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/></svg>
-                    ${date}
-                  </span>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px;">
+              <div style="display: flex; gap: 16px; align-items: flex-start; flex: 1; min-width: 280px;">
+                <div style="width: 120px; height: 85px; min-width: 120px; border-radius: var(--radius-sm); overflow: hidden; background: var(--slate-100); border: 1px solid var(--color-border); box-shadow: var(--shadow-sm); flex-shrink: 0;">
+                  <img src="${thumbUrl}" alt="${art.title}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.onerror=null; this.src='assets/images/marketplace-launch-banner.svg';">
                 </div>
-                <h3 style="font-size: 1.15rem; color: var(--slate-900); font-weight: 700; margin: 0 0 6px 0;">
-                  <a href="${localLink}" target="_blank" style="color: var(--slate-900); text-decoration: none;">${art.title}</a>
-                </h3>
-                <p style="font-size: 0.88rem; color: var(--slate-600); margin: 0 0 10px 0; line-height: 1.5; max-width: 800px;">
-                  ${summary}
-                </p>
-                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                  <code style="font-size: 0.78rem; background: var(--slate-100); padding: 3px 8px; border-radius: 4px; color: var(--teal-900);">slug: ${slug}</code>
-                  <code style="font-size: 0.78rem; color: var(--slate-500);">${localLink}</code>
+                <div style="flex: 1;">
+                  <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 6px; flex-wrap: wrap;">
+                    <span class="card-category">${category}</span>
+                    <span class="badge-tag badge-status" style="font-size: 0.75rem;">${badge}</span>
+                    <span style="font-size: 0.82rem; color: var(--slate-500); display: inline-flex; align-items: center; gap: 4px;">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/></svg>
+                      ${date}
+                    </span>
+                  </div>
+                  <h3 style="font-size: 1.15rem; color: var(--slate-900); font-weight: 700; margin: 0 0 6px 0;">
+                    <a href="${localLink}" target="_blank" style="color: var(--slate-900); text-decoration: none;">${art.title}</a>
+                  </h3>
+                  <p style="font-size: 0.88rem; color: var(--slate-600); margin: 0 0 10px 0; line-height: 1.5; max-width: 800px;">
+                    ${summary}
+                  </p>
+                  <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                    <code style="font-size: 0.78rem; background: var(--slate-100); padding: 3px 8px; border-radius: 4px; color: var(--teal-900);">slug: ${slug}</code>
+                    <code style="font-size: 0.78rem; color: var(--slate-500);">${localLink}</code>
+                  </div>
                 </div>
               </div>
 
@@ -1762,6 +1979,10 @@
                 <button type="button" class="action-btn-outline" style="padding: 7px 14px; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 6px;" onclick="copySharableArticleUrl('${publicUrl}')">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
                   Copy Link
+                </button>
+                <button type="button" class="action-btn-outline" style="padding: 7px 14px; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 6px; color: var(--teal-800); border-color: var(--teal-400); background: var(--teal-50);" onclick="editArticle('${slug}')">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                  Edit
                 </button>
                 <button type="button" class="action-btn" style="background: #EF4444; border-color: #DC2626; color: #fff; padding: 7px 14px; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 6px;" onclick="deleteArticle('${slug}', '${safeTitle}')">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
