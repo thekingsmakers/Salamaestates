@@ -11,19 +11,14 @@
 (function () {
   'use strict';
 
-  // Determine root path for relative asset/data resolution
-  const isInsideNewsSubdir = window.location.pathname.includes('/news/') && !window.location.pathname.endsWith('/news/') && !window.location.pathname.endsWith('/news/index.html');
-  const basePath = window.location.pathname.includes('/news') ? '../' : './';
-  const manifestPath = window.location.pathname.includes('/news') ? './articles.json' : './news/articles.json';
-
   let allArticles = [];
   let activeCategory = 'all';
   let searchQuery = '';
 
-  const container = document.getElementById('news-articles-container');
-  const searchInput = document.getElementById('news-search-input');
-  const categoryChips = document.querySelectorAll('.chip[data-category]');
-  const countDisplay = document.getElementById('news-count-display');
+  let container = null;
+  let searchInput = null;
+  let categoryChips = [];
+  let countDisplay = null;
 
   const DEFAULT_FALLBACK_ARTICLES = [
     {
@@ -48,7 +43,12 @@
 
   // Initialize
   async function init() {
+    container = document.getElementById('news-articles-container');
     if (!container) return;
+
+    searchInput = document.getElementById('news-search-input');
+    categoryChips = document.querySelectorAll('.chip[data-category]');
+    countDisplay = document.getElementById('news-count-display');
 
     // Check if any deleted articles exist in localStorage
     let deletedSlugs = [];
@@ -70,12 +70,18 @@
       // 1. Fetch articles manifest
       let manifestArticles = [];
       try {
-        const res = await fetch(manifestPath, { cache: 'no-cache' });
+        let res = await fetch('news/articles.json', { cache: 'no-cache' });
+        if (!res.ok) {
+          res = await fetch('./articles.json', { cache: 'no-cache' });
+        }
         if (res.ok) {
           manifestArticles = await res.json();
         }
       } catch (e) {
-        console.warn('Auto-fetcher note: manifest fetch offline or restricted, using fallback.');
+        try {
+          const res2 = await fetch('./articles.json', { cache: 'no-cache' });
+          if (res2.ok) manifestArticles = await res2.json();
+        } catch (e2) {}
       }
 
       // If manifest is empty or failed to load, fallback to DEFAULT_FALLBACK_ARTICLES
@@ -298,18 +304,11 @@
 
   // Resolve proper relative URL for links
   function resolveArticleLink(articlePath) {
-    if (window.location.pathname.includes('/news/')) {
-      // We are already inside news/
-      if (articlePath.startsWith('news/')) {
-        return './' + articlePath.substring(5);
-      }
-      return './' + articlePath;
+    let p = (articlePath || '').trim().replace(/^\.\//, '').replace(/^\/+/, '');
+    if (!p.startsWith('news/')) {
+      p = 'news/' + p;
     }
-    // We are at root
-    if (articlePath.startsWith('news/')) {
-      return './' + articlePath;
-    }
-    return './news/' + articlePath;
+    return p;
   }
 
   // Filter and Render
@@ -348,17 +347,6 @@
       return;
     }
 
-    function getRootPrefix() {
-      const p = (window.location.pathname || '').replace(/\\/g, '/');
-      if (p.includes('/news/') && !p.endsWith('/news/') && !p.endsWith('/news/index.html')) {
-        return '../../';
-      }
-      if (p.includes('/news') || p.endsWith('/news')) {
-        return '../';
-      }
-      return './';
-    }
-
     function resolveImageLink(imgPath) {
       if (!imgPath || typeof imgPath !== 'string') return '';
       const trimmed = imgPath.trim();
@@ -370,9 +358,7 @@
       }
 
       // Strip any leading ./ or ../ or /
-      const clean = trimmed.replace(/^(\.\.\/)+/, '').replace(/^\.\//, '').replace(/^\//, '');
-      const prefix = getRootPrefix();
-      return prefix + clean;
+      return trimmed.replace(/^(\.\.\/)+/, '').replace(/^\.\//, '').replace(/^\//, '');
     }
 
     const fallbackBanner = resolveImageLink('assets/images/marketplace-launch-banner.svg');
@@ -439,11 +425,25 @@
         `;
       })
       .join('');
+
+    // Hook card links into SPA router if present
+    if (window.salamaNavigate && container) {
+      container.querySelectorAll('a[href]').forEach((link) => {
+        const href = link.getAttribute('href');
+        if (href && !href.startsWith('http://') && !href.startsWith('https://') && !href.startsWith('#')) {
+          link.addEventListener('click', (e) => {
+            e.preventDefault();
+            window.salamaNavigate(href, true);
+          });
+        }
+      });
+    }
   }
 
   // Setup Event Listeners
   function setupEventListeners() {
-    if (searchInput) {
+    if (searchInput && !searchInput._hasSearchListener) {
+      searchInput._hasSearchListener = true;
       searchInput.addEventListener('input', (e) => {
         searchQuery = e.target.value;
         renderArticles();
@@ -451,12 +451,15 @@
     }
 
     categoryChips.forEach((chip) => {
-      chip.addEventListener('click', () => {
-        categoryChips.forEach((c) => c.classList.remove('active'));
-        chip.classList.add('active');
-        activeCategory = chip.getAttribute('data-category');
-        renderArticles();
-      });
+      if (!chip._hasChipListener) {
+        chip._hasChipListener = true;
+        chip.addEventListener('click', () => {
+          categoryChips.forEach((c) => c.classList.remove('active'));
+          chip.classList.add('active');
+          activeCategory = chip.getAttribute('data-category');
+          renderArticles();
+        });
+      }
     });
   }
 
@@ -471,6 +474,9 @@
     });
     renderArticles();
   };
+
+  // Expose global initializer for SPA transitions
+  window.initNewsFetcher = init;
 
   // Run on DOM loaded
   if (document.readyState === 'loading') {
