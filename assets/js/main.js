@@ -133,51 +133,51 @@ function initFixedSidebar() {
   sidebar.setAttribute('aria-label', 'Primary Portal Navigation');
 
   sidebar.innerHTML = `
-    <div class="sidebar-brand-box">
-      <a href="${root}index.html" class="sidebar-brand-link">
-        <img src="${root}assets/images/logo.svg" alt="Salama Estates Logo" width="36" height="36">
-        <div>
-          <div class="sidebar-brand-title">Salama Estates</div>
-          <div class="sidebar-brand-subtitle">Information &amp; News</div>
+    <div class="pfs-header">
+      <a href="${root}index.html" class="pfs-brand">
+        <img src="${root}assets/images/logo.svg" alt="Salama Estates Logo" class="pfs-brand-logo" width="30" height="30">
+        <div class="pfs-brand-meta">
+          <div class="pfs-brand-title">Salama Estates</div>
+          <div class="pfs-brand-subtitle">Information &amp; News</div>
         </div>
       </a>
-      <button class="btn-sidebar-close" aria-label="Close sidebar">&times;</button>
+      <button class="pfs-btn-close" aria-label="Close sidebar">&times;</button>
     </div>
 
     <!-- Quick Action / Login Button -->
-    <div style="padding: 16px 18px 8px;">
-      <a href="https://salamaestates.com/login" target="_blank" class="sidebar-cta-btn">
+    <div class="pfs-cta-wrap">
+      <a href="https://salamaestates.com/login" target="_blank" class="pfs-cta-btn">
         <span>Sign In / Register</span>
         ${icons.external}
       </a>
     </div>
 
-    <div class="sidebar-scrollable-body">
+    <div class="pfs-nav-body">
 
       <!-- Group 1: Platform Core -->
-      <div class="sidebar-nav-group">
-        <div class="sidebar-group-label">Platform Core</div>
-        <ul class="sidebar-nav-list">
+      <div class="pfs-group">
+        <div class="pfs-group-title">Platform Core</div>
+        <ul class="pfs-list">
           <li>
-            <a href="${root}index.html" class="sidebar-link" data-page="home">
+            <a href="${root}index.html" class="pfs-link" data-page="home">
               ${icons.home}
               <span>Home &amp; Live Feed</span>
             </a>
           </li>
           <li>
-            <a href="${root}docs.html" class="sidebar-link" data-page="docs">
+            <a href="${root}docs.html" class="pfs-link" data-page="docs">
               ${icons.docs}
               <span>Documentation &amp; Goals</span>
             </a>
           </li>
           <li>
-            <a href="${root}overview.html" class="sidebar-link" data-page="overview">
+            <a href="${root}overview.html" class="pfs-link" data-page="overview">
               ${icons.compass}
               <span>Overview &amp; Mission</span>
             </a>
           </li>
           <li>
-            <a href="${root}transparency.html" class="sidebar-link" data-page="transparency">
+            <a href="${root}transparency.html" class="pfs-link" data-page="transparency">
               ${icons.shield}
               <span>Data Quality &amp; Policy</span>
             </a>
@@ -186,23 +186,23 @@ function initFixedSidebar() {
       </div>
 
       <!-- Group 2: Stakeholders -->
-      <div class="sidebar-nav-group">
-        <div class="sidebar-group-label">Stakeholders</div>
-        <ul class="sidebar-nav-list">
+      <div class="pfs-group">
+        <div class="pfs-group-title">Stakeholders</div>
+        <ul class="pfs-list">
           <li>
-            <a href="${root}owners.html" class="sidebar-link" data-page="owners">
+            <a href="${root}owners.html" class="pfs-link" data-page="owners">
               ${icons.key}
               <span>Why Post Directly?</span>
             </a>
           </li>
           <li>
-            <a href="${root}roadmap.html" class="sidebar-link" data-page="roadmap">
+            <a href="${root}roadmap.html" class="pfs-link" data-page="roadmap">
               ${icons.trending}
               <span>Growth Roadmap</span>
             </a>
           </li>
           <li>
-            <a href="${root}faq.html" class="sidebar-link" data-page="faq">
+            <a href="${root}faq.html" class="pfs-link" data-page="faq">
               ${icons.help}
               <span>Frequently Asked Questions</span>
             </a>
@@ -211,17 +211,17 @@ function initFixedSidebar() {
       </div>
 
       <!-- Group 3: Newsroom -->
-      <div class="sidebar-nav-group">
-        <div class="sidebar-group-label">Newsroom</div>
-        <ul class="sidebar-nav-list">
+      <div class="pfs-group">
+        <div class="pfs-group-title">Newsroom</div>
+        <ul class="pfs-list">
           <li>
-            <a href="${root}news/index.html" class="sidebar-link" data-page="news">
+            <a href="${root}news/index.html" class="pfs-link" data-page="news">
               ${icons.newspaper}
               <span>All News &amp; Updates</span>
             </a>
           </li>
           <li>
-            <a href="${root}news/platform-launch-initiative/index.html" class="sidebar-link" data-page="launch">
+            <a href="${root}news/platform-launch-initiative/index.html" class="pfs-link" data-page="launch">
               ${icons.trending}
               <span>Launch Initiative (Sept 2026)</span>
             </a>
@@ -230,24 +230,24 @@ function initFixedSidebar() {
       </div>
 
       <!-- Group 4: Support & External -->
-      <div class="sidebar-nav-group">
-        <div class="sidebar-group-label">Support &amp; Inquiries</div>
-        <ul class="sidebar-nav-list">
+      <div class="pfs-group">
+        <div class="pfs-group-title">Support &amp; Inquiries</div>
+        <ul class="pfs-list">
           <li>
-            <a href="https://salamaestates.com/help" target="_blank" class="sidebar-link" style="color: var(--teal-700); font-weight: 600;">
+            <a href="https://salamaestates.com/help" target="_blank" class="pfs-link pfs-link-ext">
               ${icons.support}
               <span>Salama Help Desk</span>
-              ${icons.external}
+              <span class="pfs-external-badge">${icons.external}</span>
             </a>
           </li>
           <li>
-            <a href="${root}contact.html?type=agency" class="sidebar-link" data-page="agency">
+            <a href="${root}contact.html?type=agency" class="pfs-link" data-page="agency">
               ${icons.building}
               <span>Agency Verification Desk</span>
             </a>
           </li>
           <li>
-            <a href="${root}contact.html" class="sidebar-link" data-page="contact">
+            <a href="${root}contact.html" class="pfs-link" data-page="contact">
               ${icons.mail}
               <span>General Inquiries Desk</span>
             </a>
@@ -256,11 +256,11 @@ function initFixedSidebar() {
       </div>
 
       <!-- Group 5: Administration -->
-      <div class="sidebar-nav-group">
-        <div class="sidebar-group-label">Administration</div>
-        <ul class="sidebar-nav-list">
+      <div class="pfs-group">
+        <div class="pfs-group-title">Administration</div>
+        <ul class="pfs-list">
           <li>
-            <a href="${root}admin.html" class="sidebar-link" data-page="admin" style="color: var(--slate-600);">
+            <a href="${root}admin.html" class="pfs-link" data-page="admin">
               ${icons.lock}
               <span>Admin Publishing Studio</span>
             </a>
@@ -271,9 +271,12 @@ function initFixedSidebar() {
     </div>
 
     <!-- Sidebar Footer -->
-    <div class="sidebar-footer-box">
-      <div>&copy; 2026 Salama Estates</div>
-      <div style="font-size: 0.72rem; color: var(--slate-500); margin-top: 2px;">Public Information Platform</div>
+    <div class="pfs-footer">
+      <div class="pfs-footer-row">
+        <span class="pfs-status-dot"></span>
+        <span class="pfs-footer-copy">&copy; 2026 Salama Estates</span>
+      </div>
+      <div class="pfs-footer-meta">Public Information Platform</div>
     </div>
   `;
 
@@ -281,7 +284,7 @@ function initFixedSidebar() {
 
   // Active state matching
   const currentPath = window.location.pathname.toLowerCase();
-  const sidebarLinks = sidebar.querySelectorAll('.sidebar-link');
+  const sidebarLinks = sidebar.querySelectorAll('.pfs-link');
   sidebarLinks.forEach((link) => {
     const href = link.getAttribute('href').toLowerCase();
     if (
@@ -305,7 +308,7 @@ function initFixedSidebar() {
 
   // Mobile drawer toggle handlers
   const mobileToggle = mobileBar.querySelector('.btn-mobile-toggle');
-  const closeBtn = sidebar.querySelector('.btn-sidebar-close');
+  const closeBtn = sidebar.querySelector('.pfs-btn-close');
 
   function openSidebar() {
     sidebar.classList.add('open');
