@@ -241,9 +241,10 @@ function initFixedSidebar() {
             </a>
           </li>
           <li>
-            <a href="${root}contact.html?type=agency" class="pfs-link" data-page="agency">
+            <a href="https://salamaestates.com/register" target="_blank" class="pfs-link pfs-link-ext">
               ${icons.building}
-              <span>Agency Verification Desk</span>
+              <span>Agent &amp; Agency Verification</span>
+              <span class="pfs-external-badge">${icons.external}</span>
             </a>
           </li>
           <li>
