@@ -12,7 +12,7 @@ Set-Location $ProjectRoot
 
 Clear-Host
 Write-Host "==========================================================" -ForegroundColor Cyan
-Write-Host "  🔑 SALAMA ESTATES - PASSWORD MANAGEMENT TOOL            " -ForegroundColor Cyan
+Write-Host "  SALAMA ESTATES - PASSWORD MANAGEMENT TOOL               " -ForegroundColor Cyan
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host ""
 
@@ -21,7 +21,7 @@ $BSTR1 = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($NewPassIn
 $PlainPass1 = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($BSTR1)
 
 if ($PlainPass1.Length -lt 6) {
-    Write-Host "❌ Password must be at least 6 characters long." -ForegroundColor Red
+    Write-Host "[Error] Password must be at least 6 characters long." -ForegroundColor Red
     exit 1
 }
 
@@ -30,7 +30,7 @@ $BSTR2 = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($ConfirmPa
 $PlainPass2 = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($BSTR2)
 
 if ($PlainPass1 -ne $PlainPass2) {
-    Write-Host "❌ Passwords do not match. Please try again." -ForegroundColor Red
+    Write-Host "[Error] Passwords do not match. Please try again." -ForegroundColor Red
     exit 1
 }
 
@@ -45,7 +45,7 @@ if (Test-Path $AuthJsPath) {
     $Content = Get-Content $AuthJsPath -Raw
     $Content = $Content -replace "const DEFAULT_HASH = '[a-f0-9]{64}';", "const DEFAULT_HASH = '$NewHash';"
     Set-Content $AuthJsPath -Value $Content -Encoding UTF8
-    Write-Host "✅ Updated: assets/js/auth.js" -ForegroundColor Green
+    Write-Host "[Success] Updated: assets/js/auth.js" -ForegroundColor Green
 }
 
 # 2. Update publish-news.ps1
@@ -54,12 +54,12 @@ if (Test-Path $PublishPsPath) {
     $Content = Get-Content $PublishPsPath -Raw
     $Content = $Content -replace '\$ExpectedHash = "[a-f0-9]{64}"', "`$ExpectedHash = `"$NewHash`""
     Set-Content $PublishPsPath -Value $Content -Encoding UTF8
-    Write-Host "✅ Updated: publish-news.ps1" -ForegroundColor Green
+    Write-Host "[Success] Updated: publish-news.ps1" -ForegroundColor Green
 }
 
 Write-Host ""
 Write-Host "==========================================================" -ForegroundColor Green
-Write-Host "  🎉 PASSWORD CHANGED SUCCESSFULLY!                       " -ForegroundColor Green
+Write-Host "  PASSWORD CHANGED SUCCESSFULLY!                          " -ForegroundColor Green
 Write-Host "==========================================================" -ForegroundColor Green
 Write-Host "Your new password is now active for both the Web Studio (admin.html) and CLI (publish-news.ps1)." -ForegroundColor Green
 Write-Host ""
