@@ -37,43 +37,30 @@ salama-estate-news/
 
 ---
 
-## ⚡ How the Automated News System Works
+## 🔐 Admin Password & Automation Studio
 
-Every news article is stored as a clean, standalone HTML page (`index.html`) inside its own folder under `news/`:
+The portal includes an automated publishing system with password protection:
+- **Default Admin Password:** `salama2026` (changeable anytime in Settings)
+- **Default Site Access:** Public (optional private site lock can be turned on in Settings)
 
-### 1. Reusable Article Template
-Inside [`news/template/index.html`](news/template/index.html), you have a pre-formatted article page equipped with:
-- Canonical news `<meta>` tags:
-  ```html
-  <meta name="news:title" content="Article Title">
-  <meta name="news:category" content="Platform Development">
-  <meta name="news:date" content="October 2026">
-  <meta name="news:readTime" content="4 min read">
-  <meta name="news:status" content="Active Initiative">
-  <meta name="news:badge" content="Official">
-  <meta name="description" content="Brief summary for cards and search">
-  ```
-- Sticky in-page table of contents
-- Reading progress bar
-- Responsive typography, checklists, and official statement banners
+### 🌟 Option 1: Browser News Studio (`admin.html`)
+1. Open [`admin.html`](admin.html) in your browser.
+2. Enter the password `salama2026`.
+3. Enter your news title, category, date, and content.
+4. Click **"🚀 Publish & Generate Sharable Link"**:
+   - Automatically builds the article `index.html`.
+   - Adds the entry to `news/articles.json`.
+   - Generates the live GitHub Pages link (e.g. `https://<username>.github.io/<repo>/news/<slug>/`) with a **"Copy Link"** button!
+   - Can save directly to your folder using Chrome/Edge File System API or download.
 
-### 2. How to Add a New News Article in 60 Seconds
-1. Duplicate the `news/template/` folder and rename it to your article slug, e.g.:
-   `news/october-2026-agency-verification/`
-2. Open its `index.html` and update the `<meta>` tags and article content.
-3. Add the entry to [`news/articles.json`](news/articles.json):
-   ```json
-   {
-     "id": "october-2026-agency-verification",
-     "slug": "october-2026-agency-verification",
-     "path": "october-2026-agency-verification/index.html",
-     "title": "Agency Verification Program Launch",
-     "category": "Agency",
-     "date": "October 2026",
-     "summary": "Announcing credential verification and dedicated badges for licensed real estate agencies."
-   }
-   ```
-4. **Done!** The homepage (`index.html`) and Newsroom (`news/index.html`) automatically fetch, parse, and render the new article card with instant search and category filtering.
+### 🌟 Option 2: 1-Command PowerShell Automation (`publish-news.ps1`)
+Run in PowerShell:
+```powershell
+.\publish-news.ps1
+```
+1. Prompts for password (`salama2026`).
+2. Prompts for Title, Category, Summary.
+3. Automatically duplicates the template, injects all `<meta>` tags and content into `news/<slug>/index.html`, updates `news/articles.json`, and **copies the live sharable link directly to your Windows Clipboard!**
 
 ---
 

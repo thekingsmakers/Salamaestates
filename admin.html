@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Salama Estates News Publisher &amp; Admin Studio</title>
+  
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="icon" href="assets/images/logo.svg" type="image/svg+xml">
+  <style>
+    .admin-layout {
+      max-width: 1200px;
+      margin: 32px auto 60px;
+      padding: 0 20px;
+    }
+    .admin-card {
+      background: #fff;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 24px;
+    }
+    .form-group {
+      margin-bottom: 18px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--slate-800);
+      margin-bottom: 6px;
+    }
+    .form-hint {
+      font-size: 0.8rem;
+      color: var(--slate-500);
+      margin-top: 4px;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+    }
+    .action-btn {
+      background: var(--color-primary);
+      color: #fff;
+      border: none;
+      padding: 12px 20px;
+      border-radius: var(--radius-md);
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+    .action-btn:hover {
+      background: var(--color-primary-dark);
+      box-shadow: var(--shadow-md);
+    }
+    .action-btn-outline {
+      background: #fff;
+      color: var(--slate-700);
+      border: 1px solid var(--color-border);
+      padding: 8px 14px;
+      border-radius: var(--radius-md);
+      font-weight: 500;
+      font-size: 0.88rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .action-btn-outline:hover {
+      background: var(--slate-100);
+      color: var(--slate-900);
+    }
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(22, 31, 34, 0.85);
+      backdrop-filter: blur(6px);
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-box {
+      background: #fff;
+      max-width: 440px;
+      width: 100%;
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      box-shadow: var(--shadow-lg);
+      text-align: center;
+    }
+    .link-output-box {
+      background: var(--teal-50);
+      border: 2px dashed var(--teal-400);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      margin-top: 24px;
+      display: none;
+    }
+    .url-display {
+      font-family: var(--font-mono);
+      font-size: 0.92rem;
+      color: var(--teal-900);
+      background: #fff;
+      border: 1px solid var(--teal-200);
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      word-break: break-all;
+      margin: 10px 0 14px;
+      display: block;
+    }
+    .tab-bar {
+      display: flex;
+      gap: 12px;
+      border-bottom: 2px solid var(--color-border);
+      margin-bottom: 24px;
+    }
+    .tab-btn {
+      background: none;
+      border: none;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--slate-500);
+      padding: 10px 14px;
+      cursor: pointer;
+      position: relative;
+    }
+    .tab-btn.active {
+      color: var(--color-primary);
+    }
+    .tab-btn.active::after {
+      content: "";
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: var(--color-primary);
+    }
+    .section-block {
+      background: var(--slate-50);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      margin-bottom: 12px;
+      position: relative;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Password Protection Gate Modal -->
+  <div id="auth-modal" class="modal-overlay" style="display: flex;">
+    <div class="modal-box">
+      <div style="width: 56px; height: 56px; background: var(--teal-100); color: var(--teal-700); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 24px;">
+        🔐
+      </div>
+      <h2 style="font-size: 1.4rem; color: var(--slate-900); margin-bottom: 6px;">News Studio Login</h2>
+      <p style="font-size: 0.88rem; color: var(--slate-600); margin-bottom: 20px;">
+        Please enter the admin password to create news and generate sharable links.
+      </p>
+
+      <form id="admin-login-form">
+        <input
+          type="password"
+          id="admin-password-input"
+          class="search-input"
+          placeholder="Default password: salama2026"
+          style="padding-left: 14px; margin-bottom: 10px;"
+          required
+          autofocus
+        >
+        <div id="login-error" style="color: var(--red-600); font-size: 0.85rem; margin-bottom: 12px; display: none;">
+          Incorrect password. (Default is <code>salama2026</code>)
+        </div>
+        <button type="submit" class="action-btn" style="width: 100%; justify-content: center;">
+          Unlock News Studio &rarr;
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Top Announcement Bar -->
+  <aside class="top-notice-bar">
+    <span class="badge-live">Admin Studio</span>
+    Salama Estates News Publisher &amp; Automated Sharable Link Generator
+  </aside>
+
+  <!-- Site Navigation -->
+  <header class="site-header">
+    <div class="nav-container">
+      <a href="index.html" class="brand-wrapper">
+        <img src="assets/images/logo.svg" alt="Salama Estates Logo" class="brand-logo">
+        <div class="brand-text">
+          <h1>Salama Estates</h1>
+          <span>News &amp; Information Studio</span>
+        </div>
+      </a>
+
+      <button class="menu-toggle" aria-label="Toggle navigation" aria-expanded="false">&#9776;</button>
+
+      <nav>
+        <ul class="nav-links">
+          <li><a href="index.html">View Site</a></li>
+          <li><a href="news/index.html">Newsroom</a></li>
+          <li><button onclick="handleLogout()" class="chip" style="color: var(--red-600); border-color: var(--red-50); background: #fff;">Lock / Logout</button></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Admin Workspace -->
+  <main class="admin-layout" id="admin-workspace" style="display: none;">
+
+    <div class="hero-badge-row" style="margin-bottom: 20px;">
+      <span class="badge-tag badge-primary">⚡ Automation Studio</span>
+      <span class="badge-tag badge-status">Password Authenticated</span>
+      <span class="badge-tag badge-date">Instant Sharable Links</span>
+    </div>
+
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="switchTab('create')">✍️ Publish New Article</button>
+      <button class="tab-btn" onclick="switchTab('existing')">📚 Existing Articles</button>
+      <button class="tab-btn" onclick="switchTab('settings')">⚙️ Security &amp; GitHub Setup</button>
+    </div>
+
+    <!-- TAB 1: CREATE ARTICLE -->
+    <div id="tab-create">
+      <form id="article-builder-form" onsubmit="handlePublish(event)">
+        
+        <div class="admin-card">
+          <h2 style="font-size: 1.3rem; color: var(--slate-900); margin-bottom: 18px;">
+            1. Core Article Metadata
+          </h2>
+
+          <div class="form-group">
+            <label for="news-title">Article Headline / Title *</label>
+            <input
+              type="text"
+              id="news-title"
+              class="search-input"
+              style="padding-left: 14px; font-size: 1.1rem; font-weight: 600;"
+              placeholder="e.g. October 2026: Agency Verification Program Launch"
+              required
+              oninput="autoGenerateSlug(this.value)"
+            >
+          </div>
+
+          <div class="grid-3">
+            <div class="form-group">
+              <label for="news-slug">Folder &amp; URL Slug *</label>
+              <input
+                type="text"
+                id="news-slug"
+                class="search-input"
+                style="padding-left: 14px;"
+                placeholder="october-2026-agency-verification"
+                required
+              >
+              <div class="form-hint">Path will be: <code>news/[slug]/index.html</code></div>
+            </div>
+
+            <div class="form-group">
+              <label for="news-category">Category *</label>
+              <select id="news-category" class="search-input" style="padding-left: 14px;" required>
+                <option value="Platform Development">Platform Development</option>
+                <option value="Agency Verification">Agency Verification</option>
+                <option value="Property Owners">Property Owners</option>
+                <option value="Roadmap">Roadmap &amp; Milestones</option>
+                <option value="Policy &amp; Standards">Policy &amp; Standards</option>
+                <option value="General Announcement">General Announcement</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="news-date">Publication Date *</label>
+              <input
+                type="text"
+                id="news-date"
+                class="search-input"
+                style="padding-left: 14px;"
+                value="October 2026"
+                required
+              >
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="form-group">
+              <label for="news-readtime">Estimated Read Time</label>
+              <input type="text" id="news-readtime" class="search-input" style="padding-left: 14px;" value="4 min read">
+            </div>
+            <div class="form-group">
+              <label for="news-badge">Badge Label</label>
+              <input type="text" id="news-badge" class="search-input" style="padding-left: 14px;" value="Official Announcement">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="news-summary">Executive Summary / Excerpt *</label>
+            <textarea
+              id="news-summary"
+              class="search-input"
+              style="padding: 12px 14px; min-height: 80px; resize: vertical;"
+              placeholder="Brief 2-3 sentence overview that appears in search and cards..."
+              required
+            ></textarea>
+          </div>
+        </div>
+
+        <div class="admin-card">
+          <h2 style="font-size: 1.3rem; color: var(--slate-900); margin-bottom: 18px;">
+            2. Article Content &amp; Sections
+          </h2>
+
+          <div class="form-group">
+            <label for="news-quote">Featured Quote / Mission Statement (Optional)</label>
+            <input
+              type="text"
+              id="news-quote"
+              class="search-input"
+              style="padding-left: 14px;"
+              placeholder="e.g. Verified agencies establish confidence and streamline the real estate experience for all."
+            >
+          </div>
+
+          <div id="sections-container">
+            <div class="section-block">
+              <div class="form-group">
+                <label>Section 1 Heading</label>
+                <input type="text" class="search-input section-heading" style="padding-left: 14px;" placeholder="e.g. Program Overview &amp; Eligibility" required>
+              </div>
+              <div class="form-group">
+                <label>Section 1 Body Text (HTML or Plain Text)</label>
+                <textarea class="search-input section-body" style="padding: 12px 14px; min-height: 120px; resize: vertical;" placeholder="Write the detailed explanation, background context, or instructions..." required></textarea>
+              </div>
+            </div>
+          </div>
+
+          <button type="button" class="action-btn-outline" onclick="addSection()">
+            + Add Another Content Section
+          </button>
+        </div>
+
+        <div class="admin-card">
+          <h2 style="font-size: 1.3rem; color: var(--slate-900); margin-bottom: 18px;">
+            3. Automated Actions &amp; Publish
+          </h2>
+          <p style="font-size: 0.9rem; color: var(--slate-600); margin-bottom: 20px;">
+            This will create <code>news/[slug]/index.html</code>, update <code>news/articles.json</code>, register it in the live feed, and generate your sharable link.
+          </p>
+
+          <div style="display: flex; gap: 14px; flex-wrap: wrap;">
+            <button type="submit" class="action-btn">
+              🚀 Publish &amp; Generate Sharable Link
+            </button>
+            <button type="button" class="action-btn-outline" onclick="saveDirectlyToDisk()">
+              📁 Save Directly to salama-estate-news Folder (Chrome/Edge)
+            </button>
+          </div>
+
+          <!-- SHARABLE LINK OUTPUT BOX -->
+          <div id="sharable-link-box" class="link-output-box">
+            <h3 style="color: var(--teal-900); font-size: 1.2rem; margin-bottom: 4px;">
+              🎉 Article Published Successfully!
+            </h3>
+            <p style="font-size: 0.9rem; color: var(--teal-800);">
+              Your news has been packaged, registered into <code>articles.json</code>, and added to the automated feed.
+            </p>
+
+            <label style="font-size: 0.85rem; font-weight: 700; color: var(--teal-900); margin-top: 14px; display: block;">
+              Live Sharable Link (GitHub Pages):
+            </label>
+            <code id="sharable-url-display" class="url-display">https://your-username.github.io/salama-estate-news/news/...</code>
+
+            <label style="font-size: 0.85rem; font-weight: 700; color: var(--teal-900); margin-top: 10px; display: block;">
+              Local Preview Link:
+            </label>
+            <code id="local-url-display" class="url-display">news/.../index.html</code>
+
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px;">
+              <button type="button" class="action-btn" onclick="copySharableLink()">
+                📋 Copy Sharable Link
+              </button>
+              <a id="open-article-btn" href="#" target="_blank" class="action-btn-outline">
+                ↗️ Open Article in New Tab
+              </a>
+              <button type="button" class="action-btn-outline" onclick="downloadArticleFiles()">
+                📥 Download HTML &amp; JSON
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+      </form>
+    </div>
+
+    <!-- TAB 2: EXISTING ARTICLES -->
+    <div id="tab-existing" style="display: none;">
+      <div class="admin-card">
+        <h2 style="font-size: 1.3rem; color: var(--slate-900); margin-bottom: 18px;">
+          All Published News &amp; Communiques
+        </h2>
+        <div id="existing-articles-list" style="display: flex; flex-direction: column; gap: 14px;">
+          <!-- Dynamically loaded -->
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: SETTINGS -->
+    <div id="tab-settings" style="display: none;">
+      <div class="admin-card">
+        <h2 style="font-size: 1.3rem; color: var(--slate-900); margin-bottom: 18px;">
+          Security &amp; Password Settings
+        </h2>
+        
+        <form onsubmit="handlePasswordChange(event)" style="max-width: 440px; margin-bottom: 32px;">
+          <div class="form-group">
+            <label>Current Password *</label>
+            <input type="password" id="old-pass" class="search-input" style="padding-left: 14px;" required>
+          </div>
+          <div class="form-group">
+            <label>New Password * (Min 6 characters)</label>
+            <input type="password" id="new-pass" class="search-input" style="padding-left: 14px;" required>
+          </div>
+          <button type="submit" class="action-btn">Update Password</button>
+          <div id="pwd-msg" style="margin-top: 10px; font-size: 0.88rem;"></div>
+        </form>
+
+        <hr style="border: none; border-top: 1px solid var(--color-border); margin: 24px 0;">
+
+        <h3 style="font-size: 1.15rem; color: var(--slate-900); margin-bottom: 12px;">
+          Site-Wide Private Access Lock
+        </h3>
+        <p style="font-size: 0.9rem; color: var(--slate-600); margin-bottom: 16px;">
+          Enable this to require a password from any public visitor before they can browse the information site.
+        </p>
+        <label style="display: inline-flex; align-items: center; gap: 10px; cursor: pointer; font-weight: 600;">
+          <input type="checkbox" id="site-lock-toggle" onchange="toggleSiteLock(this.checked)" style="width: 20px; height: 20px;">
+          Require Password for All Site Visitors
+        </label>
+
+        <hr style="border: none; border-top: 1px solid var(--color-border); margin: 24px 0;">
+
+        <h3 style="font-size: 1.15rem; color: var(--slate-900); margin-bottom: 12px;">
+          GitHub Pages Configuration (For Sharable Links)
+        </h3>
+        <p style="font-size: 0.9rem; color: var(--slate-600); margin-bottom: 16px;">
+          Set your GitHub username and repository name so generated links automatically match your public URL.
+        </p>
+        <div class="grid-2" style="max-width: 600px;">
+          <div class="form-group">
+            <label>GitHub Username</label>
+            <input type="text" id="gh-user" class="search-input" style="padding-left: 14px;" placeholder="e.g. myusername" oninput="saveGhConfig()">
+          </div>
+          <div class="form-group">
+            <label>GitHub Repository Name</label>
+            <input type="text" id="gh-repo" class="search-input" style="padding-left: 14px;" value="salama-estate-news" oninput="saveGhConfig()">
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/main.js"></script>
+  <script>
+    let generatedArticleData = null;
+    let generatedHtmlContent = '';
+
+    // Check login state
+    document.addEventListener('DOMContentLoaded', () => {
+      if (SalamaAuth.isAdminAuthenticated()) {
+        unlockAdminView();
+      }
+
+      // Pre-fill GH settings
+      document.getElementById('gh-user').value = localStorage.getItem('salama_gh_user') || '';
+      document.getElementById('gh-repo').value = localStorage.getItem('salama_gh_repo') || 'salama-estate-news';
+      document.getElementById('site-lock-toggle').checked = SalamaAuth.isSiteLockEnabled();
+
+      loadExistingArticlesList();
+    });
+
+    // Handle Login Form
+    document.getElementById('admin-login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const pwd = document.getElementById('admin-password-input').value;
+      const valid = await SalamaAuth.verifyPassword(pwd);
+      if (valid) {
+        SalamaAuth.setAdminAuthenticated(true);
+        unlockAdminView();
+      } else {
+        document.getElementById('login-error').style.display = 'block';
+      }
+    });
+
+    function unlockAdminView() {
+      document.getElementById('auth-modal').style.display = 'none';
+      document.getElementById('admin-workspace').style.display = 'block';
+    }
+
+    function handleLogout() {
+      SalamaAuth.setAdminAuthenticated(false);
+      window.location.reload();
+    }
+
+    // Slug generator
+    function autoGenerateSlug(title) {
+      const slugInput = document.getElementById('news-slug');
+      if (!slugInput.dataset.manual) {
+        slugInput.value = title
+          .toLowerCase()
+          .replace(/[^\w\s-]/g, '')
+          .replace(/[\s_-]+/g, '-')
+          .replace(/^-+|-+$/g, '');
+      }
+    }
+    document.getElementById('news-slug').addEventListener('input', function() {
+      this.dataset.manual = 'true';
+    });
+
+    // Section builder
+    let sectionCount = 1;
+    function addSection() {
+      sectionCount++;
+      const container = document.getElementById('sections-container');
+      const div = document.createElement('div');
+      div.className = 'section-block';
+      div.innerHTML = `
+        <button type="button" onclick="this.parentElement.remove()" style="position: absolute; top: 12px; right: 12px; background: none; border: none; color: var(--red-600); cursor: pointer; font-size: 0.85rem; font-weight: 600;">&times; Remove</button>
+        <div class="form-group">
+          <label>Section ${sectionCount} Heading</label>
+          <input type="text" class="search-input section-heading" style="padding-left: 14px;" placeholder="e.g. Next Steps &amp; Action Items" required>
+        </div>
+        <div class="form-group">
+          <label>Section ${sectionCount} Body Text</label>
+          <textarea class="search-input section-body" style="padding: 12px 14px; min-height: 100px; resize: vertical;" placeholder="Write section details..." required></textarea>
+        </div>
+      `;
+      container.appendChild(div);
+    }
+
+    // Tab switcher
+    function switchTab(tab) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+      document.getElementById('tab-create').style.display = tab === 'create' ? 'block' : 'none';
+      document.getElementById('tab-existing').style.display = tab === 'existing' ? 'block' : 'none';
+      document.getElementById('tab-settings').style.display = tab === 'settings' ? 'block' : 'none';
+      if (tab === 'existing') loadExistingArticlesList();
+    }
+
+    // Generate Full HTML for Article
+    function buildArticleHtml(data) {
+      const sectionsHtml = data.sections.map((s, idx) => `
+        <section id="section-${idx + 1}">
+          <h2>${idx + 1}. ${s.heading}</h2>
+          <p>${s.body.replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br>')}</p>
+        </section>
+      `).join('');
+
+      const tocHtml = data.sections.map((s, idx) => `
+        <li><a href="#section-${idx + 1}">${idx + 1}. ${s.heading}</a></li>
+      `).join('');
+
+      const quoteHtml = data.quote ? `
+        <blockquote>
+          &ldquo;${data.quote}&rdquo;
+        </blockquote>
+      ` : '';
+
+      return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${data.title} | Salama Estates News</title>
+  
+  <!-- Auto-Fetch & SEO Metadata -->
+  <meta name="news:title" content="${data.title}">
+  <meta name="news:category" content="${data.category}">
+  <meta name="news:date" content="${data.date}">
+  <meta name="news:readTime" content="${data.readTime}">
+  <meta name="news:status" content="Verified Communication">
+  <meta name="news:badge" content="${data.badge}">
+  <meta name="description" content="${data.summary}">
+  <meta property="og:title" content="${data.title}">
+  <meta property="og:description" content="${data.summary}">
+  <meta property="og:type" content="article">
+
+  <link rel="stylesheet" href="../../assets/css/style.css">
+  <link rel="icon" href="../../assets/images/logo.svg" type="image/svg+xml">
+</head>
+<body>
+
+  <div id="reading-progress"></div>
+
+  <aside class="top-notice-bar">
+    <span class="badge-live">Official Notice</span>
+    Salama Estates Public Information &amp; Newsroom
+  </aside>
+
+  <header class="site-header">
+    <div class="nav-container">
+      <a href="../../index.html" class="brand-wrapper">
+        <img src="../../assets/images/logo.svg" alt="Salama Estates Logo" class="brand-logo">
+        <div class="brand-text">
+          <h1>Salama Estates</h1>
+          <span>Public Information Portal</span>
+        </div>
+      </a>
+      <button class="menu-toggle" aria-label="Toggle navigation">&#9776;</button>
+      <nav>
+        <ul class="nav-links">
+          <li><a href="../../index.html">Home</a></li>
+          <li><a href="../../overview.html">Overview</a></li>
+          <li><a href="../../transparency.html">Transparency</a></li>
+          <li><a href="../../owners.html">For Owners</a></li>
+          <li><a href="../../roadmap.html">Roadmap</a></li>
+          <li><a href="../../faq.html">FAQ</a></li>
+          <li><a href="../index.html" class="active">News</a></li>
+          <li><a href="../../contact.html" class="nav-btn">Contact Us</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <div class="article-container">
+
+      <nav class="breadcrumb-nav">
+        <a href="../../index.html">Home</a> &rsaquo;
+        <a href="../index.html">Newsroom</a> &rsaquo;
+        <span>${data.title}</span>
+      </nav>
+
+      <header class="article-header">
+        <div class="hero-badge-row">
+          <span class="badge-tag badge-primary">${data.category}</span>
+          <span class="badge-tag badge-status">${data.badge}</span>
+          <span class="badge-tag badge-date">📅 ${data.date}</span>
+        </div>
+
+        <h1 class="article-main-title">${data.title}</h1>
+
+        <div class="article-meta-bar">
+          <span><strong>Category:</strong> ${data.category}</span>
+          <span>&bull;</span>
+          <span><strong>Read Time:</strong> ${data.readTime}</span>
+          <span>&bull;</span>
+          <span class="official-stamp">✓ Verified Release</span>
+        </div>
+      </header>
+
+      <div class="article-layout-grid">
+
+        <aside class="article-toc">
+          <h4>On This Page</h4>
+          <ul>
+            <li><a href="#summary-section">Overview</a></li>
+            ${tocHtml}
+          </ul>
+          <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--color-border);">
+            <a href="../index.html" style="font-size: 0.85rem; font-weight: 600; color: var(--color-primary); display: flex; align-items: center; gap: 6px;">
+              &larr; Back to All News
+            </a>
+          </div>
+        </aside>
+
+        <article class="article-body">
+          <section id="summary-section">
+            <p style="font-size: 1.15rem; color: var(--slate-800); font-weight: 500; line-height: 1.7;">
+              ${data.summary}
+            </p>
+            ${quoteHtml}
+          </section>
+
+          ${sectionsHtml}
+
+          <div class="statement-card" style="margin-top: 40px;">
+            <h3>Official Communique</h3>
+            <p>
+              This publication is issued as part of Salama Estates commitment to community-first transparency and reliable marketplace information.
+            </p>
+          </div>
+        </article>
+
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-bottom">
+        <div>&copy; 2026 Salama Estates. All rights reserved.</div>
+        <div>Public Information Notice &bull; GitHub Pages Static Deployment</div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="../../assets/js/main.js"></script>
+</body>
+</html>`;
+    }
+
+    // Handle Publish Submit
+    function handlePublish(e) {
+      e.preventDefault();
+
+      const title = document.getElementById('news-title').value.trim();
+      const slug = document.getElementById('news-slug').value.trim();
+      const category = document.getElementById('news-category').value;
+      const date = document.getElementById('news-date').value.trim();
+      const readTime = document.getElementById('news-readtime').value.trim();
+      const badge = document.getElementById('news-badge').value.trim();
+      const summary = document.getElementById('news-summary').value.trim();
+      const quote = document.getElementById('news-quote').value.trim();
+
+      const headingInputs = document.querySelectorAll('.section-heading');
+      const bodyInputs = document.querySelectorAll('.section-body');
+
+      const sections = [];
+      headingInputs.forEach((h, i) => {
+        sections.push({
+          heading: h.value.trim(),
+          body: bodyInputs[i].value.trim()
+        });
+      });
+
+      const articleObj = {
+        id: slug,
+        slug: slug,
+        path: `news/${slug}/index.html`,
+        title: title,
+        category: category,
+        categorySlug: category.toLowerCase().replace(/[^\w]/g, '-'),
+        date: date,
+        isoDate: new Date().toISOString(),
+        readTime: readTime,
+        badge: badge,
+        status: 'Active Communication',
+        summary: summary,
+        tags: [category, 'Announcement']
+      };
+
+      generatedArticleData = articleObj;
+      generatedHtmlContent = buildArticleHtml({
+        title, slug, category, date, readTime, badge, summary, quote, sections
+      });
+
+      // Save to localStorage so it instantly appears in news feed on this device!
+      let customArticles = [];
+      try {
+        const stored = localStorage.getItem('salama_custom_articles');
+        if (stored) customArticles = JSON.parse(stored);
+      } catch (err) {}
+
+      // Update or add
+      customArticles = customArticles.filter(a => a.slug !== slug);
+      customArticles.unshift(articleObj);
+      localStorage.setItem('salama_custom_articles', JSON.stringify(customArticles));
+
+      // Build Sharable URLs
+      const ghUser = localStorage.getItem('salama_gh_user') || 'YOUR_USERNAME';
+      const ghRepo = localStorage.getItem('salama_gh_repo') || 'salama-estate-news';
+
+      const publicSharableUrl = `https://${ghUser}.github.io/${ghRepo}/news/${slug}/`;
+      const localUrl = `news/${slug}/index.html`;
+
+      document.getElementById('sharable-url-display').innerText = publicSharableUrl;
+      document.getElementById('local-url-display').innerText = localUrl;
+      document.getElementById('open-article-btn').href = localUrl;
+
+      document.getElementById('sharable-link-box').style.display = 'block';
+      document.getElementById('sharable-link-box').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Direct Disk Save via Modern File System Access API
+    async function saveDirectlyToDisk() {
+      if (!generatedArticleData) {
+        alert('Please click "Publish & Generate Sharable Link" first to generate the article!');
+        return;
+      }
+
+      if (!('showDirectoryPicker' in window)) {
+        alert('File System Access API is not supported in this browser. Please use Chrome or Edge, or use the "Download HTML & JSON" button.');
+        return;
+      }
+
+      try {
+        alert('Please select your "salama-estate-news" project folder to automatically write the files.');
+        const dirHandle = await window.showDirectoryPicker();
+
+        // 1. Get or create news directory
+        const newsDirHandle = await dirHandle.getDirectoryHandle('news', { create: true });
+
+        // 2. Create article directory
+        const articleDirHandle = await newsDirHandle.getDirectoryHandle(generatedArticleData.slug, { create: true });
+
+        // 3. Write index.html
+        const fileHandle = await articleDirHandle.getFileHandle('index.html', { create: true });
+        const writable = await fileHandle.createWritable();
+        await writable.write(generatedHtmlContent);
+        await writable.close();
+
+        // 4. Update articles.json
+        let articlesList = [];
+        try {
+          const jsonFileHandle = await newsDirHandle.getFileHandle('articles.json', { create: false });
+          const file = await jsonFileHandle.getFile();
+          const text = await file.text();
+          articlesList = JSON.parse(text);
+        } catch (e) {
+          articlesList = [];
+        }
+
+        articlesList = articlesList.filter(a => a.slug !== generatedArticleData.slug);
+        articlesList.unshift(generatedArticleData);
+
+        const jsonFileHandle = await newsDirHandle.getFileHandle('articles.json', { create: true });
+        const jsonWritable = await jsonFileHandle.createWritable();
+        await jsonWritable.write(JSON.stringify(articlesList, null, 2));
+        await jsonWritable.close();
+
+        alert(`✅ Successfully created news/${generatedArticleData.slug}/index.html and updated news/articles.json on disk!`);
+      } catch (err) {
+        console.error(err);
+        alert('Disk save note: ' + err.message);
+      }
+    }
+
+    // Download generated files
+    function downloadArticleFiles() {
+      if (!generatedArticleData || !generatedHtmlContent) return;
+
+      // Download index.html
+      const htmlBlob = new Blob([generatedHtmlContent], { type: 'text/html' });
+      const htmlUrl = URL.createObjectURL(htmlBlob);
+      const a1 = document.createElement('a');
+      a1.href = htmlUrl;
+      a1.download = 'index.html';
+      a1.click();
+      URL.revokeObjectURL(htmlUrl);
+    }
+
+    // Copy Sharable link
+    function copySharableLink() {
+      const url = document.getElementById('sharable-url-display').innerText;
+      navigator.clipboard.writeText(url).then(() => {
+        alert('📋 Sharable Link copied to clipboard!\n\n' + url);
+      });
+    }
+
+    // Password change
+    async function handlePasswordChange(e) {
+      e.preventDefault();
+      const oldP = document.getElementById('old-pass').value;
+      const newP = document.getElementById('new-pass').value;
+      const msg = document.getElementById('pwd-msg');
+      try {
+        await SalamaAuth.changePassword(oldP, newP);
+        msg.style.color = 'var(--green-600)';
+        msg.innerText = '✓ Password updated successfully!';
+        document.getElementById('old-pass').value = '';
+        document.getElementById('new-pass').value = '';
+      } catch (err) {
+        msg.style.color = 'var(--red-600)';
+        msg.innerText = err.message;
+      }
+    }
+
+    function toggleSiteLock(enabled) {
+      SalamaAuth.setSiteLockEnabled(enabled);
+      alert(enabled ? '🔒 Site-wide password lock enabled. Public visitors will now be asked for password.' : '🔓 Site-wide lock disabled. Site is open to public.');
+    }
+
+    function saveGhConfig() {
+      localStorage.setItem('salama_gh_user', document.getElementById('gh-user').value.trim());
+      localStorage.setItem('salama_gh_repo', document.getElementById('gh-repo').value.trim());
+    }
+
+    // Load Existing Articles
+    async function loadExistingArticlesList() {
+      const container = document.getElementById('existing-articles-list');
+      if (!container) return;
+
+      let articles = [];
+      try {
+        const res = await fetch('news/articles.json');
+        if (res.ok) articles = await res.json();
+      } catch (e) {}
+
+      // Add local ones
+      try {
+        const stored = localStorage.getItem('salama_custom_articles');
+        if (stored) {
+          const custom = JSON.parse(stored);
+          custom.forEach(c => {
+            if (!articles.some(a => a.slug === c.slug)) articles.unshift(c);
+          });
+        }
+      } catch (e) {}
+
+      const ghUser = localStorage.getItem('salama_gh_user') || 'username';
+      const ghRepo = localStorage.getItem('salama_gh_repo') || 'salama-estate-news';
+
+      container.innerHTML = articles.map(art => {
+        const link = `news/${art.slug}/index.html`;
+        const publicUrl = `https://${ghUser}.github.io/${ghRepo}/news/${art.slug}/`;
+
+        return `
+          <div style="background: var(--slate-50); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+            <div>
+              <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 4px;">
+                <span class="card-category">${art.category}</span>
+                <span style="font-size: 0.8rem; color: var(--slate-500);">${art.date}</span>
+              </div>
+              <h4 style="font-size: 1.05rem; color: var(--slate-900);">${art.title}</h4>
+              <code style="font-size: 0.8rem; color: var(--slate-500);">${link}</code>
+            </div>
+
+            <div style="display: flex; gap: 8px;">
+              <a href="${link}" target="_blank" class="action-btn-outline">Open Article &rarr;</a>
+              <button class="action-btn-outline" onclick="navigator.clipboard.writeText('${publicUrl}').then(() => alert('Copied: ${publicUrl}'))">
+                📋 Copy Link
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+  </script>
+</body>
+</html>

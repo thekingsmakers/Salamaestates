@@ -51,7 +51,15 @@
 
       // 3. Optional: GitHub API auto-scanner if hosted on GitHub Pages
       const ghArticles = await scanGitHubPagesRepo();
-      const combined = mergeArticles(hydratedArticles, ghArticles);
+
+      // 4. Merge locally created articles from admin dashboard (if any)
+      let localCreated = [];
+      try {
+        const stored = localStorage.getItem('salama_custom_articles');
+        if (stored) localCreated = JSON.parse(stored);
+      } catch (e) {}
+
+      const combined = mergeArticles(mergeArticles(hydratedArticles, ghArticles), localCreated);
 
       // Sort by date (newest first)
       allArticles = combined.sort((a, b) => new Date(b.isoDate || b.date) - new Date(a.isoDate || a.date));
