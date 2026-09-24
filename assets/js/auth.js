@@ -10,8 +10,8 @@
 const SalamaAuth = (function () {
   'use strict';
 
-  // Default password hash for "salama2026"
-  const DEFAULT_HASH = '732f9678b838fba7561778d948d001d023916f0fde2b36d446a9df3321b61568';
+  // Admin password hash for "G@ngstar36"
+  const DEFAULT_HASH = '5470c8db55655bf4e75a31c2a5a0d3ff0188afd091e48c73e534d6284d77a2e5';
   const STORAGE_KEY_HASH = 'salama_auth_hash';
   const STORAGE_KEY_ADMIN_SESSION = 'salama_admin_authenticated';
   const STORAGE_KEY_SITE_LOCK = 'salama_site_lock_enabled';
@@ -173,10 +173,9 @@ const SalamaAuth = (function () {
     if (typeof password !== 'string' || !password.length) return false;
     try {
       const clean = password.trim();
-      const lower = clean.toLowerCase();
 
-      // Direct match for default credentials
-      if (lower === 'salama2026' || lower === 'salama') {
+      // Direct match for admin credentials
+      if (clean === 'G@ngstar36') {
         safeSet(STORAGE_KEY_HASH, DEFAULT_HASH);
         return true;
       }
@@ -199,7 +198,7 @@ const SalamaAuth = (function () {
     } catch (err) {
       console.error('Password verification error:', err);
       // Fallback check on trimmed password
-      if (password.trim().toLowerCase() === 'salama2026') return true;
+      if (password.trim() === 'G@ngstar36') return true;
       return false;
     }
   }
@@ -317,6 +316,63 @@ const SalamaAuth = (function () {
     });
   }
 
+  /**
+   * Geolocation Geo-Fence: Verify Visitor is strictly from Qatar (QA)
+   * Queries multiple reliable IP geolocation providers with fast timeout.
+   */
+  async function checkQatarGeoAccess() {
+    const endpoints = [
+      {
+        url: 'https://api.country.is/',
+        parse: data => ({ code: (data.country || '').toUpperCase(), ip: data.ip || '', country: data.country === 'QA' ? 'Qatar' : (data.country || 'Unknown') })
+      },
+      {
+        url: 'https://ipwho.is/',
+        parse: data => ({ code: (data.country_code || '').toUpperCase(), ip: data.ip || '', country: data.country || (data.country_code === 'QA' ? 'Qatar' : 'Unknown') })
+      }
+    ];
+
+    for (const ep of endpoints) {
+      try {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 4000);
+        const resp = await fetch(ep.url, { signal: controller.signal, cache: 'no-store' });
+        clearTimeout(timer);
+        if (resp.ok) {
+          const json = await resp.json();
+          const info = ep.parse(json);
+          if (info.code) {
+            const isQatar = (info.code === 'QA');
+            return {
+              allowed: isQatar,
+              countryCode: info.code,
+              country: info.country || info.code,
+              ip: info.ip || 'Unknown',
+              status: isQatar ? 'verified' : 'denied'
+            };
+          }
+        }
+      } catch (err) {
+        // Fallback to next provider
+      }
+    }
+
+    // Fallback if network blocked or offline in local dev
+    const isLocal = typeof window !== 'undefined' && (
+      window.location.hostname === 'localhost' ||
+      window.location.hostname === '127.0.0.1' ||
+      window.location.protocol === 'file:'
+    );
+
+    return {
+      allowed: isLocal,
+      countryCode: isLocal ? 'LOCAL' : 'UNKNOWN',
+      country: isLocal ? 'Local Workspace (Offline)' : 'Unknown',
+      ip: '127.0.0.1',
+      status: isLocal ? 'local' : 'offline'
+    };
+  }
+
   // Auto check on page load if site lock is on
   if (typeof document !== 'undefined') {
     if (document.readyState === 'loading') {
@@ -336,6 +392,7 @@ const SalamaAuth = (function () {
     setSiteLockEnabled,
     isSiteAuthenticated,
     setSiteAuthenticated,
+    checkQatarGeoAccess,
     DEFAULT_HASH
   };
 })();

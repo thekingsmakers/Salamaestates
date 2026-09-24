@@ -39,15 +39,17 @@ salama-estate-news/
 
 ## 🔐 Admin Password & Automation Studio
 
-The portal includes an automated publishing system with password protection:
-- **Default Admin Password:** `salama2026` (changeable anytime in Settings)
+The portal includes an automated publishing system with password protection and regional IP security:
+- **Admin Password:** `G@ngstar36` (changeable anytime in Settings or via `set-password.ps1`)
+- **Geo-Fence Security:** Admin access is strictly restricted to **Qatar IP addresses (QA)**.
 - **Default Site Access:** Public (optional private site lock can be turned on in Settings)
 
 ### 🌟 Option 1: Browser News Studio (`admin.html`)
 1. Open [`admin.html`](admin.html) in your browser.
-2. Enter the password `salama2026`.
-3. Enter your news title, category, date, and content.
-4. Click **"🚀 Publish & Generate Sharable Link"**:
+2. Verified Qatar IP gate authenticates regional access.
+3. Enter the admin password: `G@ngstar36`.
+4. Enter your news title, category, date, and content.
+5. Click **"🚀 Publish & Generate Sharable Link"**:
    - Automatically builds the article `index.html`.
    - Adds the entry to `news/articles.json`.
    - Generates the live GitHub Pages link (e.g. `https://<username>.github.io/<repo>/news/<slug>/`) with a **"Copy Link"** button!
@@ -58,9 +60,10 @@ Run in PowerShell:
 ```powershell
 .\publish-news.ps1
 ```
-1. Prompts for password (`salama2026`).
-2. Prompts for Title, Category, Summary.
-3. Automatically duplicates the template, injects all `<meta>` tags and content into `news/<slug>/index.html`, updates `news/articles.json`, and **copies the live sharable link directly to your Windows Clipboard!**
+1. Verifies Qatar IP address access.
+2. Prompts for password (`G@ngstar36`).
+3. Prompts for Title, Category, Summary.
+4. Automatically duplicates the template, injects all `<meta>` tags and content into `news/<slug>/index.html`, updates `news/articles.json`, and **copies the live sharable link directly to your Windows Clipboard!**
 
 ---
 

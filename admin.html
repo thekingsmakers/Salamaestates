@@ -206,22 +206,18 @@
           </button>
         </div>
         <div id="login-error" style="color: var(--red-600); font-size: 0.85rem; margin-bottom: 12px; display: none; line-height: 1.4;">
-          Incorrect password.
-          <div style="margin-top: 6px;">
-            <button type="button" onclick="handleResetToDefault()" style="background: none; border: none; color: var(--color-primary); text-decoration: underline; font-size: 0.82rem; cursor: pointer; padding: 0;">
-              Reset to default password (salama2026)
-            </button>
-          </div>
+          Incorrect password. Access denied.
         </div>
-        <button type="submit" class="action-btn" style="width: 100%; justify-content: center;">
+        <button type="submit" id="admin-submit-btn" class="action-btn" style="width: 100%; justify-content: center;">
           Unlock News Studio &rarr;
         </button>
 
-        <div style="margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--color-border); display: flex; align-items: center; justify-content: space-between;">
-          <span style="font-size: 0.78rem; color: var(--slate-500);">Direct Owner Access:</span>
-          <button type="button" onclick="quickBypass()" style="background: var(--teal-50); border: 1px solid var(--teal-300); color: var(--teal-800); border-radius: 4px; padding: 5px 12px; font-size: 0.8rem; font-weight: 600; cursor: pointer;">
-            Quick Unlock &rarr;
-          </button>
+        <div id="geo-status-badge" style="margin-top: 16px; padding: 10px 14px; border-radius: 8px; font-size: 0.8rem; background: var(--slate-100); border: 1px solid var(--color-border); display: flex; align-items: center; justify-content: space-between;">
+          <span style="display: flex; align-items: center; gap: 8px;">
+            <span id="geo-dot" style="width: 8px; height: 8px; border-radius: 50%; background: var(--slate-400); display: inline-block;"></span>
+            <span id="geo-text" style="color: var(--slate-600); font-weight: 500;">Verifying Qatar IP gate...</span>
+          </span>
+          <span id="geo-tag" style="font-size: 0.72rem; padding: 2px 6px; border-radius: 4px; background: var(--slate-200); color: var(--slate-700); font-weight: 600;">QA Only</span>
         </div>
       </form>
     </div>
@@ -669,10 +665,104 @@
       }
     }
 
+    let geoAccessStatus = null;
+
+    async function verifyGeoLocationGate() {
+      const dot = document.getElementById('geo-dot');
+      const text = document.getElementById('geo-text');
+      const tag = document.getElementById('geo-tag');
+      const submitBtn = document.getElementById('admin-submit-btn');
+      const pwdInput = document.getElementById('admin-password-input');
+      const geoBox = document.getElementById('geo-status-badge');
+
+      if (!dot || !text) return;
+
+      try {
+        if (typeof SalamaAuth !== 'undefined' && SalamaAuth.checkQatarGeoAccess) {
+          geoAccessStatus = await SalamaAuth.checkQatarGeoAccess();
+        } else {
+          const res = await fetch('https://api.country.is/', { cache: 'no-store' });
+          const json = await res.json();
+          const isQA = json && json.country === 'QA';
+          geoAccessStatus = {
+            allowed: isQA,
+            countryCode: json.country || 'UNKNOWN',
+            country: isQA ? 'Qatar' : json.country,
+            ip: json.ip || ''
+          };
+        }
+      } catch (err) {
+        const isLocal = window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        geoAccessStatus = {
+          allowed: isLocal,
+          countryCode: isLocal ? 'LOCAL' : 'OFFLINE',
+          country: isLocal ? 'Local Workspace (Offline)' : 'Unknown',
+          ip: '127.0.0.1'
+        };
+      }
+
+      if (geoAccessStatus && geoAccessStatus.allowed) {
+        dot.style.background = '#10B981';
+        text.innerText = `🇶🇦 Qatar IP Verified (${geoAccessStatus.countryCode}${geoAccessStatus.ip ? ' - ' + geoAccessStatus.ip : ''})`;
+        text.style.color = '#065F46';
+        if (tag) {
+          tag.innerText = 'Allowed';
+          tag.style.background = '#D1FAE5';
+          tag.style.color = '#065F46';
+        }
+        if (geoBox) {
+          geoBox.style.background = '#ECFDF5';
+          geoBox.style.borderColor = '#A7F3D0';
+        }
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.style.opacity = '1';
+          submitBtn.style.cursor = 'pointer';
+        }
+        if (pwdInput) pwdInput.disabled = false;
+      } else {
+        dot.style.background = '#EF4444';
+        const detected = geoAccessStatus ? (geoAccessStatus.country || geoAccessStatus.countryCode) : 'Outside Qatar';
+        const detectedIp = geoAccessStatus && geoAccessStatus.ip ? ` (${geoAccessStatus.ip})` : '';
+        text.innerText = `🚫 Access Denied: Admin access restricted to Qatar IPs only. Detected: ${detected}${detectedIp}`;
+        text.style.color = '#991B1B';
+        if (tag) {
+          tag.innerText = 'Forbidden';
+          tag.style.background = '#FEE2E2';
+          tag.style.color = '#991B1B';
+        }
+        if (geoBox) {
+          geoBox.style.background = '#FEF2F2';
+          geoBox.style.borderColor = '#FECACA';
+        }
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.innerText = 'Access Blocked (Non-Qatar IP)';
+          submitBtn.style.opacity = '0.5';
+          submitBtn.style.cursor = 'not-allowed';
+        }
+        if (pwdInput) {
+          pwdInput.disabled = true;
+          pwdInput.placeholder = 'Access blocked from your region';
+        }
+      }
+    }
+
+    // Clear stale default hash if present
+    try {
+      if (localStorage.getItem('salama_auth_hash') === '732f9678b838fba7561778d948d001d023916f0fde2b36d446a9df3321b61568') {
+        localStorage.removeItem('salama_auth_hash');
+      }
+    } catch (e) {}
+
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initAdminAuth);
+      document.addEventListener('DOMContentLoaded', () => {
+        initAdminAuth();
+        verifyGeoLocationGate();
+      });
     } else {
       initAdminAuth();
+      verifyGeoLocationGate();
     }
 
     // Handle Login Form
@@ -683,10 +773,17 @@
       const errorBox = document.getElementById('login-error');
       errorBox.style.display = 'none';
 
+      // Enforce Qatar IP check
+      if (geoAccessStatus && !geoAccessStatus.allowed) {
+        errorBox.innerText = `Access Denied: Administration is restricted to verified Qatar IP addresses. Detected region: ${geoAccessStatus.country || geoAccessStatus.countryCode}.`;
+        errorBox.style.display = 'block';
+        return;
+      }
+
       try {
         let valid = false;
-        // Direct credential fallback so admin is never locked out
-        if (pwd.toLowerCase() === 'salama2026' || pwd.toLowerCase() === 'salama') {
+        // Direct credential check for G@ngstar36
+        if (pwd === 'G@ngstar36') {
           valid = true;
         } else if (typeof SalamaAuth !== 'undefined' && SalamaAuth.verifyPassword) {
           valid = await SalamaAuth.verifyPassword(pwd);
@@ -695,15 +792,16 @@
         if (valid) {
           unlockAdminView();
         } else {
+          errorBox.innerText = 'Incorrect password. Access denied.';
           errorBox.style.display = 'block';
           pwdInput.focus();
         }
       } catch (err) {
         console.error('Login error:', err);
-        if (pwd.toLowerCase() === 'salama2026' || pwd.toLowerCase() === 'salama') {
+        if (pwd === 'G@ngstar36') {
           unlockAdminView();
         } else {
-          errorBox.innerHTML = `Error verifying password: ${err.message}<br><button type="button" onclick="handleResetToDefault()" style="background: none; border: none; color: var(--color-primary); text-decoration: underline; font-size: 0.82rem; cursor: pointer; padding: 4px 0;">Reset to default (salama2026)</button>`;
+          errorBox.innerText = 'Incorrect password. Access denied.';
           errorBox.style.display = 'block';
         }
       }
@@ -719,26 +817,6 @@
       } else {
         eyeIcon.innerHTML = '<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>';
       }
-    }
-
-    function handleResetToDefault() {
-      if (confirm('Reset the admin password to the default ("salama2026")? This clears any local browser overrides.')) {
-        try {
-          if (typeof SalamaAuth !== 'undefined' && SalamaAuth.resetToDefaultPassword) {
-            SalamaAuth.resetToDefaultPassword();
-          }
-          localStorage.removeItem('salama_auth_hash');
-        } catch (e) {}
-        alert('Password has been reset to default: salama2026. You can now unlock the studio using salama2026.');
-        const input = document.getElementById('admin-password-input');
-        input.value = 'salama2026';
-        document.getElementById('login-error').style.display = 'none';
-        input.focus();
-      }
-    }
-
-    function quickBypass() {
-      unlockAdminView();
     }
 
     function unlockAdminView() {
