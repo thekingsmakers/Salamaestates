@@ -543,14 +543,21 @@
             <h3 id="sharable-link-title" style="color: var(--teal-900); font-size: 1.2rem; margin-bottom: 4px;">
               Article Published Successfully!
             </h3>
-            <p style="font-size: 0.9rem; color: var(--teal-800);">
+            <p id="sharable-link-status" style="font-size: 0.9rem; color: var(--teal-800);">
               Your news has been packaged, registered into <code>articles.json</code>, and added to the automated feed.
             </p>
 
+            <div id="gh-publish-progress" style="display: none; margin: 12px 0; padding: 12px 14px; background: #fff; border-radius: var(--radius-md); border: 1px solid var(--teal-300);"></div>
+
             <label style="font-size: 0.85rem; font-weight: 700; color: var(--teal-900); margin-top: 14px; display: block;">
-              Live Sharable Link (GitHub Pages):
+              Live Public Link (Primary Domain):
             </label>
-            <code id="sharable-url-display" class="url-display">https://your-username.github.io/salama-estate-news/news/...</code>
+            <code id="sharable-url-display" class="url-display">https://info.salamaestates.com/news/...</code>
+
+            <label style="font-size: 0.85rem; font-weight: 700; color: var(--teal-900); margin-top: 10px; display: block;">
+              GitHub Pages Alternative Link:
+            </label>
+            <code id="gh-pages-url-display" class="url-display">https://thekingsmakers.github.io/Salamaestates/news/...</code>
 
             <label style="font-size: 0.85rem; font-weight: 700; color: var(--teal-900); margin-top: 10px; display: block;">
               Local Preview Link:
@@ -559,7 +566,7 @@
 
             <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px;">
               <button type="button" class="action-btn" onclick="copySharableLink()">
-                Copy Sharable Link
+                Copy Live Link
               </button>
               <a id="open-article-btn" href="#" target="_blank" class="action-btn-outline">
                 Open Article in New Tab &rarr;
@@ -654,22 +661,69 @@
 
         <hr style="border: none; border-top: 1px solid var(--color-border); margin: 24px 0;">
 
-        <h3 style="font-size: 1.15rem; color: var(--slate-900); margin-bottom: 12px;">
-          GitHub Pages Configuration (For Sharable Links)
-        </h3>
-        <p style="font-size: 0.9rem; color: var(--slate-600); margin-bottom: 16px;">
-          Set your GitHub username and repository name so generated links automatically match your public URL.
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 6px;">
+          <h3 style="font-size: 1.15rem; color: var(--slate-900); margin: 0;">
+            🚀 GitHub Cloud Auto-Publishing &amp; Live Sharable Links
+          </h3>
+          <span id="gh-conn-badge" class="badge-tag" style="background: #FEF3C7; color: #92400E; font-size: 0.78rem;">
+            Token Not Set (Local Only)
+          </span>
+        </div>
+        <p style="font-size: 0.9rem; color: var(--slate-600); margin-bottom: 18px;">
+          Configure your GitHub repository and Personal Access Token (PAT). When set, publishing an article automatically writes the folders and files directly to GitHub and deploys them live to the web with 1 click—no manual folder creation or Git Desktop needed!
         </p>
-        <div class="grid-2" style="max-width: 600px;">
+
+        <div class="grid-2" style="max-width: 720px; gap: 16px;">
           <div class="form-group">
-            <label>GitHub Username</label>
-            <input type="text" id="gh-user" class="search-input" style="padding-left: 14px;" placeholder="e.g. myusername" oninput="saveGhConfig()">
+            <label>GitHub Organization / Username</label>
+            <input type="text" id="gh-user" class="search-input" style="padding-left: 14px;" value="thekingsmakers" placeholder="thekingsmakers">
           </div>
           <div class="form-group">
             <label>GitHub Repository Name</label>
-            <input type="text" id="gh-repo" class="search-input" style="padding-left: 14px;" value="salama-estate-news" oninput="saveGhConfig()">
+            <input type="text" id="gh-repo" class="search-input" style="padding-left: 14px;" value="Salamaestates" placeholder="Salamaestates">
           </div>
         </div>
+
+        <div class="grid-2" style="max-width: 720px; gap: 16px; margin-top: 12px;">
+          <div class="form-group">
+            <label>Live Public Domain / Base URL</label>
+            <input type="text" id="gh-domain" class="search-input" style="padding-left: 14px;" value="https://info.salamaestates.com" placeholder="https://info.salamaestates.com">
+            <div class="form-hint">CNAME domain or GitHub Pages URL (e.g. <code>https://info.salamaestates.com</code>)</div>
+          </div>
+          <div class="form-group">
+            <label>GitHub Personal Access Token (PAT)</label>
+            <div style="position: relative;">
+              <input type="password" id="gh-token" class="search-input" style="padding-left: 14px; padding-right: 40px;" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+              <button type="button" onclick="toggleTokenVisibility()" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--slate-500); font-size: 1rem;" title="Show/Hide Token">
+                👁️
+              </button>
+            </div>
+            <div class="form-hint">Requires <code>repo</code> scope (Full control of repository)</div>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-top: 16px;">
+          <button type="button" class="action-btn" onclick="saveGhConfig()">
+            Save GitHub Settings
+          </button>
+          <button type="button" class="action-btn-outline" onclick="testGitHubConnection()">
+            Test GitHub Connection
+          </button>
+          <span id="gh-status-feedback" style="font-size: 0.88rem; font-weight: 600;"></span>
+        </div>
+
+        <details style="margin-top: 18px; padding: 14px; background: var(--teal-50); border: 1px solid var(--teal-200); border-radius: var(--radius-md); font-size: 0.88rem; color: var(--teal-900);">
+          <summary style="font-weight: 700; cursor: pointer; color: var(--teal-900);">
+            📖 How to create your GitHub Personal Access Token (1-Minute Guide)
+          </summary>
+          <ol style="margin: 10px 0 0 20px; line-height: 1.7;">
+            <li>Go to <a href="https://github.com/settings/tokens" target="_blank" style="color: var(--color-primary); font-weight: 600;">github.com/settings/tokens</a> (Developer Settings &gt; Personal access tokens &gt; Tokens (classic)).</li>
+            <li>Click <strong>Generate new token (classic)</strong>.</li>
+            <li>Give it a Note (e.g. <code>Salama Estates Publisher</code>) and check the <strong><code>repo</code></strong> scope box (gives write access to commit files).</li>
+            <li>Click <strong>Generate token</strong> at the bottom, copy the <code>ghp_...</code> string, and paste it into the field above.</li>
+            <li>Click <strong>Save GitHub Settings</strong>. Once saved, every new article or edit will automatically be published to GitHub with zero friction!</li>
+          </ol>
+        </details>
       </div>
     </div>
 
@@ -810,9 +864,15 @@
 
       // Pre-fill GH settings
       const ghUser = document.getElementById('gh-user');
-      if (ghUser) ghUser.value = localStorage.getItem('salama_gh_user') || '';
+      if (ghUser) ghUser.value = localStorage.getItem('salama_gh_user') || 'thekingsmakers';
       const ghRepo = document.getElementById('gh-repo');
-      if (ghRepo) ghRepo.value = localStorage.getItem('salama_gh_repo') || 'salama-estate-news';
+      if (ghRepo) ghRepo.value = localStorage.getItem('salama_gh_repo') || 'Salamaestates';
+      const ghDomain = document.getElementById('gh-domain');
+      if (ghDomain) ghDomain.value = localStorage.getItem('salama_gh_domain') || 'https://info.salamaestates.com';
+      const ghToken = document.getElementById('gh-token');
+      if (ghToken) ghToken.value = localStorage.getItem('salama_gh_token') || '';
+      if (typeof updateGhConnectionBadge === 'function') updateGhConnectionBadge();
+
       const siteLock = document.getElementById('site-lock-toggle');
       if (siteLock) siteLock.checked = SalamaAuth.isSiteLockEnabled();
 
@@ -1455,18 +1515,38 @@
       }
 
       // Build Sharable URLs
-      const ghUser = localStorage.getItem('salama_gh_user') || 'YOUR_USERNAME';
-      const ghRepo = localStorage.getItem('salama_gh_repo') || 'salama-estate-news';
+      const ghUser = localStorage.getItem('salama_gh_user') || 'thekingsmakers';
+      const ghRepo = localStorage.getItem('salama_gh_repo') || 'Salamaestates';
+      const ghDomain = localStorage.getItem('salama_gh_domain') || 'https://info.salamaestates.com';
 
-      const publicSharableUrl = `https://${ghUser}.github.io/${ghRepo}/news/${slug}/`;
+      const publicSharableUrl = `${ghDomain.replace(/\/+$/, '')}/news/${slug}/`;
+      const ghPagesUrl = `https://${ghUser}.github.io/${ghRepo}/news/${slug}/`;
       const localUrl = `news/${slug}/index.html`;
 
       document.getElementById('sharable-url-display').innerText = publicSharableUrl;
+      const ghPagesEl = document.getElementById('gh-pages-url-display');
+      if (ghPagesEl) ghPagesEl.innerText = ghPagesUrl;
       document.getElementById('local-url-display').innerText = localUrl;
       document.getElementById('open-article-btn').href = localUrl;
 
       document.getElementById('sharable-link-box').style.display = 'block';
       document.getElementById('sharable-link-box').scrollIntoView({ behavior: 'smooth' });
+
+      // Automatically trigger 1-click cloud publishing if GitHub token is present!
+      const ghToken = localStorage.getItem('salama_gh_token');
+      if (ghToken) {
+        publishToGitHubCloud(slug, generatedHtmlContent, generatedArticleData);
+      } else {
+        const progBox = document.getElementById('gh-publish-progress');
+        if (progBox) {
+          progBox.style.display = 'block';
+          progBox.innerHTML = `
+            <div style="font-size: 0.88rem; color: #92400E; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+              <span>💡 <strong>Tip:</strong> Add your GitHub Token in <a href="javascript:void(0)" onclick="switchTab('settings')" style="color: var(--teal-800); font-weight: 700; text-decoration: underline;">Settings</a> for instant 1-click cloud publishing to GitHub.</span>
+            </div>
+          `;
+        }
+      }
     }
 
     const DEFAULT_FALLBACK_ARTICLES = [
@@ -1622,11 +1702,25 @@
         localStorage.setItem('salama_custom_articles', JSON.stringify(custom));
       } catch (e) {}
 
-      // 3. Attempt direct disk deletion if handle available or user chooses to link
+      // 3. Attempt direct cloud deletion if GitHub token is configured
+      let cloudDeleted = false;
+      const ghToken = localStorage.getItem('salama_gh_token');
+      const ghUser = localStorage.getItem('salama_gh_user') || 'thekingsmakers';
+      const ghRepo = localStorage.getItem('salama_gh_repo') || 'Salamaestates';
+      if (ghToken) {
+        try {
+          await deleteGitHubArticle(ghUser, ghRepo, slug, ghToken);
+          cloudDeleted = true;
+        } catch(e) {
+          console.warn('GitHub cloud deletion error:', e);
+        }
+      }
+
+      // 4. Attempt direct disk deletion if handle available or user chooses to link
       let diskDeleted = false;
       if (projectDirHandle) {
         diskDeleted = await deleteArticleFromDisk(projectDirHandle, slug);
-      } else if ('showDirectoryPicker' in window) {
+      } else if (!cloudDeleted && 'showDirectoryPicker' in window) {
         const wantDiskSync = confirm(`Article removed from local storage and newsroom feed!\n\nWould you like to select your project folder now to also delete the "news/${slug}" folder and update "news/articles.json" on disk?`);
         if (wantDiskSync) {
           try {
@@ -1638,13 +1732,15 @@
         }
       }
 
-      // 4. Reload view
+      // 5. Reload view
       await loadExistingArticlesList();
 
-      if (diskDeleted) {
+      if (cloudDeleted) {
+        alert(`Article "${title}" was permanently deleted from local storage AND from the GitHub repository!`);
+      } else if (diskDeleted) {
         alert(`Article "${title}" was deleted from local storage AND removed from your project folder on disk!`);
       } else {
-        alert(`Article "${title}" was deleted from the newsroom and local storage.\n\nYou can also click "Download articles.json" to commit the updated manifest to Git.`);
+        alert(`Article "${title}" was deleted from the newsroom and local storage.\n\nTip: Add your GitHub Token in Settings for instant cloud synchronization with GitHub.`);
       }
     }
 
@@ -1930,11 +2026,12 @@
 
       const ghUser = localStorage.getItem('salama_gh_user') || 'thekingsmakers';
       const ghRepo = localStorage.getItem('salama_gh_repo') || 'Salamaestates';
+      const ghDomain = localStorage.getItem('salama_gh_domain') || 'https://info.salamaestates.com';
 
       container.innerHTML = articles.map(art => {
         const slug = art.slug || art.id;
         const localLink = art.path ? (art.path.startsWith('news/') ? art.path : 'news/' + art.path) : `news/${slug}/index.html`;
-        const publicUrl = `https://${ghUser}.github.io/${ghRepo}/news/${slug}/`;
+        const publicUrl = `${ghDomain.replace(/\/+$/, '')}/news/${slug}/`;
         const safeTitle = (art.title || 'Untitled Article').replace(/'/g, "\\'").replace(/"/g, '&quot;');
         const summary = art.summary || 'No summary excerpt provided.';
         const category = art.category || 'General';
@@ -2041,8 +2138,290 @@
     }
 
     function saveGhConfig() {
-      localStorage.setItem('salama_gh_user', document.getElementById('gh-user').value.trim());
-      localStorage.setItem('salama_gh_repo', document.getElementById('gh-repo').value.trim());
+      const user = document.getElementById('gh-user').value.trim() || 'thekingsmakers';
+      const repo = document.getElementById('gh-repo').value.trim() || 'Salamaestates';
+      const domain = document.getElementById('gh-domain').value.trim() || 'https://info.salamaestates.com';
+      const token = document.getElementById('gh-token').value.trim();
+
+      localStorage.setItem('salama_gh_user', user);
+      localStorage.setItem('salama_gh_repo', repo);
+      localStorage.setItem('salama_gh_domain', domain);
+      if (token) {
+        localStorage.setItem('salama_gh_token', token);
+      } else {
+        localStorage.removeItem('salama_gh_token');
+      }
+
+      updateGhConnectionBadge();
+      const fb = document.getElementById('gh-status-feedback');
+      if (fb) {
+        fb.innerHTML = '<span style="color: #16a34a; font-weight: 600;">✅ Settings saved successfully!</span>';
+        setTimeout(() => { fb.innerHTML = ''; }, 4000);
+      }
+    }
+
+    function updateGhConnectionBadge() {
+      const token = localStorage.getItem('salama_gh_token');
+      const badge = document.getElementById('gh-conn-badge');
+      if (!badge) return;
+      if (token && token.length > 8) {
+        badge.style.background = '#ECFDF5';
+        badge.style.color = '#065F46';
+        badge.innerHTML = '⚡ 1-Click Cloud Publishing Active';
+      } else {
+        badge.style.background = '#FEF3C7';
+        badge.style.color = '#92400E';
+        badge.innerHTML = '⚠️ Token Not Set (Local Only)';
+      }
+    }
+
+    function toggleTokenVisibility() {
+      const input = document.getElementById('gh-token');
+      if (input) {
+        input.type = input.type === 'password' ? 'text' : 'password';
+      }
+    }
+
+    async function testGitHubConnection() {
+      const user = document.getElementById('gh-user').value.trim() || 'thekingsmakers';
+      const repo = document.getElementById('gh-repo').value.trim() || 'Salamaestates';
+      const token = document.getElementById('gh-token').value.trim() || localStorage.getItem('salama_gh_token');
+      const fb = document.getElementById('gh-status-feedback');
+
+      if (!token) {
+        if (fb) fb.innerHTML = '<span style="color: #dc2626; font-weight: 600;">⚠️ Please enter a Personal Access Token first.</span>';
+        return;
+      }
+
+      if (fb) fb.innerHTML = '<span style="color: var(--teal-700);">Connecting to GitHub API...</span>';
+
+      try {
+        const res = await fetch(`https://api.github.com/repos/${user}/${repo}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/vnd.github.v3+json'
+          }
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          const canPush = data.permissions ? data.permissions.push : true;
+          if (fb) {
+            fb.innerHTML = `<span style="color: #16a34a; font-weight: 600;">✅ Connected to ${data.full_name}! ${canPush ? '(Write/Push verified)' : '(Notice: Check repo write permissions)'}</span>`;
+          }
+          saveGhConfig();
+        } else {
+          const err = await res.json().catch(() => ({}));
+          if (fb) {
+            fb.innerHTML = `<span style="color: #dc2626; font-weight: 600;">❌ Error (${res.status}): ${err.message || 'Token unauthorized or repo not found'}</span>`;
+          }
+        }
+      } catch (err) {
+        if (fb) fb.innerHTML = `<span style="color: #dc2626; font-weight: 600;">❌ Network error: ${err.message}</span>`;
+      }
+    }
+
+    // GitHub API Helpers for UTF-8 Base64
+    function utf8ToBase64(str) {
+      return window.btoa(unescape(encodeURIComponent(str)));
+    }
+
+    function base64ToUtf8(str) {
+      return decodeURIComponent(escape(window.atob(str)));
+    }
+
+    async function getGitHubFileSha(owner, repo, path, token, branch) {
+      try {
+        const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=${branch}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/vnd.github.v3+json'
+          }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          return data.sha;
+        }
+      } catch (e) {}
+      return null;
+    }
+
+    async function putGitHubFile(owner, repo, path, contentStr, message, token, branch = 'master') {
+      const sha = await getGitHubFileSha(owner, repo, path, token, branch);
+      const payload = {
+        message: message,
+        content: utf8ToBase64(contentStr),
+        branch: branch
+      };
+      if (sha) payload.sha = sha;
+
+      const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/vnd.github.v3+json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || `GitHub HTTP error ${res.status}`);
+      }
+      return await res.json();
+    }
+
+    async function updateGitHubArticlesJson(owner, repo, newArticleData, token, isDelete = false, targetSlug = null) {
+      let articlesList = [];
+      try {
+        const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/news/articles.json?ref=master`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/vnd.github.v3+json'
+          }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const cleanB64 = data.content.replace(/\s/g, '');
+          articlesList = JSON.parse(base64ToUtf8(cleanB64));
+        }
+      } catch(e) {
+        console.warn('Could not read articles.json from GitHub, using local fallback:', e);
+      }
+
+      if (isDelete) {
+        articlesList = articlesList.filter(a => a.slug !== targetSlug && a.id !== targetSlug);
+      } else {
+        articlesList = articlesList.filter(a => a.slug !== newArticleData.slug && a.id !== newArticleData.slug);
+        articlesList.unshift(newArticleData);
+      }
+
+      const jsonStr = JSON.stringify(articlesList, null, 2);
+
+      // Commit to master
+      await putGitHubFile(owner, repo, 'news/articles.json', jsonStr, isDelete ? `Delete article from manifest: ${targetSlug}` : `Update news manifest: ${newArticleData.title}`, token, 'master');
+
+      // Commit to main if possible
+      try {
+        await putGitHubFile(owner, repo, 'news/articles.json', jsonStr, isDelete ? `Delete article from manifest: ${targetSlug}` : `Update news manifest: ${newArticleData.title}`, token, 'main');
+      } catch(e) {}
+
+      return articlesList;
+    }
+
+    async function publishToGitHubCloud(slug, htmlContent, articleData) {
+      const user = localStorage.getItem('salama_gh_user') || 'thekingsmakers';
+      const repo = localStorage.getItem('salama_gh_repo') || 'Salamaestates';
+      const domain = localStorage.getItem('salama_gh_domain') || 'https://info.salamaestates.com';
+      const token = localStorage.getItem('salama_gh_token');
+      const progBox = document.getElementById('gh-publish-progress');
+
+      if (!token) return false;
+
+      if (progBox) {
+        progBox.style.display = 'block';
+        progBox.innerHTML = `
+          <div style="color: var(--teal-900); font-weight: 600; display: flex; align-items: center; gap: 8px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="spin"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
+            <span>Publishing directly to GitHub cloud...</span>
+          </div>
+        `;
+      }
+
+      const filePath = `news/${slug}/index.html`;
+
+      try {
+        if (progBox) progBox.innerHTML = `<div>⏳ Writing <code>${filePath}</code> to GitHub (${repo})...</div>`;
+        await putGitHubFile(user, repo, filePath, htmlContent, `Publish news article: ${articleData.title}`, token, 'master');
+
+        try {
+          await putGitHubFile(user, repo, filePath, htmlContent, `Publish news article: ${articleData.title}`, token, 'main');
+        } catch(e) {
+          console.warn('Branch main sync note:', e);
+        }
+
+        if (progBox) progBox.innerHTML = `<div>⏳ Updating <code>news/articles.json</code> on GitHub...</div>`;
+        await updateGitHubArticlesJson(user, repo, articleData, token, false, slug);
+
+        const liveUrl = `${domain.replace(/\/+$/, '')}/news/${slug}/`;
+        if (progBox) {
+          progBox.innerHTML = `
+            <div style="color: #16a34a; font-weight: 700; font-size: 0.95rem; margin-bottom: 6px;">
+              🚀 Article Published Live to GitHub!
+            </div>
+            <div style="font-size: 0.88rem; color: var(--slate-700); line-height: 1.6;">
+              The folder <code>news/${slug}/</code> and article manifest were committed directly to the repository.<br>
+              Live URL: <a href="${liveUrl}" target="_blank" style="color: var(--color-primary); font-weight: 600; text-decoration: underline;">${liveUrl}</a>
+            </div>
+          `;
+        }
+        return true;
+      } catch(err) {
+        console.error('GitHub Cloud Publish Failed:', err);
+        if (progBox) {
+          progBox.innerHTML = `
+            <div style="color: #dc2626; font-weight: 700; margin-bottom: 4px;">
+              ⚠️ GitHub Cloud Publishing Notice: ${err.message}
+            </div>
+            <div style="font-size: 0.85rem; color: var(--slate-600);">
+              The article is saved in your local browser storage. Check your GitHub Token permissions (<code>repo</code> scope) in Settings.
+            </div>
+          `;
+        }
+        return false;
+      }
+    }
+
+    async function deleteGitHubArticle(owner, repo, slug, token) {
+      const filePath = `news/${slug}/index.html`;
+
+      // 1. Delete index.html on master
+      try {
+        const shaMaster = await getGitHubFileSha(owner, repo, filePath, token, 'master');
+        if (shaMaster) {
+          await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`, {
+            method: 'DELETE',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Accept': 'application/vnd.github.v3+json',
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              message: `Delete article: news/${slug}`,
+              sha: shaMaster,
+              branch: 'master'
+            })
+          });
+        }
+      } catch(e) {
+        console.warn('Master branch delete notice:', e);
+      }
+
+      // 2. Delete index.html on main
+      try {
+        const shaMain = await getGitHubFileSha(owner, repo, filePath, token, 'main');
+        if (shaMain) {
+          await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`, {
+            method: 'DELETE',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Accept': 'application/vnd.github.v3+json',
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              message: `Delete article: news/${slug}`,
+              sha: shaMain,
+              branch: 'main'
+            })
+          });
+        }
+      } catch(e) {
+        console.warn('Main branch delete notice:', e);
+      }
+
+      // 3. Update articles.json on GitHub
+      await updateGitHubArticlesJson(owner, repo, null, token, true, slug);
     }
   </script>
 </body>
