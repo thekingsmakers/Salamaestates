@@ -1,5 +1,25 @@
 [
   {
+    "id": "policy and standards",
+    "slug": "policy and standards",
+    "path": "news/policy and standards/index.html",
+    "title": "Salama Estates Cybersecurity & Security Monitoring Policy",
+    "category": "Policy & Standards",
+    "categorySlug": "policy---standards",
+    "date": "October 2026",
+    "isoDate": "2026-09-24T13:55:13.703Z",
+    "readTime": "4 min read",
+    "badge": "policy and standards",
+    "status": "Active Communication",
+    "summary": "Salama Estates maintains a comprehensive cybersecurity and security monitoring framework designed to protect residents, staff, properties, information systems, and community facilities. Our approach combines access controls, security monitoring, system logging, incident detection, and appropriate physical security measures to identify and respond to unauthorized access, suspicious activity, and potential security incidents.",
+    "image": "",
+    "gallery": [],
+    "tags": [
+      "Policy & Standards",
+      "Announcement"
+    ]
+  },
+  {
     "id": "platform-launch-initiative",
     "slug": "platform-launch-initiative",
     "path": "platform-launch-initiative/index.html",
@@ -15,6 +35,12 @@
     "summary": "As part of our mission to create a comprehensive and trusted real estate marketplace, we have introduced a temporary property data acquisition strategy to provide users with meaningful and valuable content from day one.",
     "status": "Active Platform Growth Initiative",
     "badge": "Official Announcement",
-    "tags": ["Marketplace Launch", "Data Accuracy", "Roadmap", "Property Owners", "Agency Verification"]
+    "tags": [
+      "Marketplace Launch",
+      "Data Accuracy",
+      "Roadmap",
+      "Property Owners",
+      "Agency Verification"
+    ]
   }
 ]
