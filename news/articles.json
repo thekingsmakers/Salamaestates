@@ -1,5 +1,25 @@
 [
   {
+    "id": "platform-launch-initiative",
+    "slug": "platform-launch-initiative",
+    "path": "news/platform-launch-initiative/index.html",
+    "title": "Platform Launch Initiative: Building the Largest Property Marketplace",
+    "category": "Platform Development",
+    "categorySlug": "platform-development",
+    "date": "September 2026",
+    "isoDate": "2026-09-24T13:56:53.335Z",
+    "readTime": "5 min read",
+    "badge": "Official Announcement",
+    "status": "Active Communication",
+    "summary": "As part of our mission to create a comprehensive and trusted real estate marketplace, we have introduced a temporary property data acquisition strategy to provide users with meaningful and valuable content from day one.",
+    "image": "",
+    "gallery": [],
+    "tags": [
+      "Platform Development",
+      "Announcement"
+    ]
+  },
+  {
     "id": "policy and standards",
     "slug": "policy and standards",
     "path": "news/policy and standards/index.html",
@@ -17,30 +37,6 @@
     "tags": [
       "Policy & Standards",
       "Announcement"
-    ]
-  },
-  {
-    "id": "platform-launch-initiative",
-    "slug": "platform-launch-initiative",
-    "path": "platform-launch-initiative/index.html",
-    "image": "assets/images/marketplace-launch-banner.svg",
-    "title": "Platform Launch Initiative: Building the Largest Property Marketplace",
-    "subtitle": "Platform News & Announcements",
-    "category": "Platform Development",
-    "categorySlug": "platform-development",
-    "date": "September 2026",
-    "isoDate": "2026-09-01",
-    "readTime": "5 min read",
-    "featured": true,
-    "summary": "As part of our mission to create a comprehensive and trusted real estate marketplace, we have introduced a temporary property data acquisition strategy to provide users with meaningful and valuable content from day one.",
-    "status": "Active Platform Growth Initiative",
-    "badge": "Official Announcement",
-    "tags": [
-      "Marketplace Launch",
-      "Data Accuracy",
-      "Roadmap",
-      "Property Owners",
-      "Agency Verification"
     ]
   }
 ]
