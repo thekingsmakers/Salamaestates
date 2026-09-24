@@ -1178,20 +1178,38 @@
       window.location.reload();
     }
 
-    // Slug generator
+    // Slug generator and sanitizer
+    function slugify(text) {
+      return String(text || '')
+        .toLowerCase()
+        .trim()
+        .replace(/[^\w\s-]/g, '')
+        .replace(/[\s_-]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+    }
+
     function autoGenerateSlug(title) {
       const slugInput = document.getElementById('news-slug');
       if (!slugInput.dataset.manual) {
-        slugInput.value = title
-          .toLowerCase()
-          .replace(/[^\w\s-]/g, '')
-          .replace(/[\s_-]+/g, '-')
-          .replace(/^-+|-+$/g, '');
+        slugInput.value = slugify(title);
       }
     }
-    document.getElementById('news-slug').addEventListener('input', function() {
-      this.dataset.manual = 'true';
-    });
+
+    const slugField = document.getElementById('news-slug');
+    if (slugField) {
+      slugField.addEventListener('input', function() {
+        this.dataset.manual = 'true';
+        const clean = slugify(this.value);
+        if (this.value.endsWith(' ') || this.value.endsWith('-')) {
+          this.value = clean ? clean + '-' : '';
+        } else {
+          this.value = clean;
+        }
+      });
+      slugField.addEventListener('blur', function() {
+        this.value = slugify(this.value);
+      });
+    }
 
     // Section builder
     let sectionCount = 1;
@@ -1438,7 +1456,8 @@
       e.preventDefault();
 
       const title = document.getElementById('news-title').value.trim();
-      const slug = document.getElementById('news-slug').value.trim();
+      const rawSlug = document.getElementById('news-slug').value.trim();
+      const slug = slugify(rawSlug) || slugify(title) || 'official-notice';
       const category = document.getElementById('news-category').value;
       const date = document.getElementById('news-date').value.trim();
       const readTime = document.getElementById('news-readtime').value.trim();
@@ -1478,15 +1497,17 @@
         path: `news/${slug}/index.html`,
         title: title,
         category: category,
-        categorySlug: category.toLowerCase().replace(/[^\w]/g, '-'),
+        categorySlug: slugify(category),
         date: date,
         isoDate: new Date().toISOString(),
         readTime: readTime,
         badge: badge,
         status: 'Active Communication',
         summary: summary,
+        quote: quote,
         image: featuredImageData,
         gallery: gallery,
+        sections: sections,
         tags: [category, 'Announcement']
       };
 
@@ -1578,6 +1599,53 @@
     }
 
     const DEFAULT_FALLBACK_ARTICLES = [
+      {
+        "id": "policy-and-standards",
+        "slug": "policy-and-standards",
+        "path": "news/policy-and-standards/index.html",
+        "title": "Salama Estates Cybersecurity & Security Monitoring Policy",
+        "category": "Policy & Standards",
+        "categorySlug": "policy-and-standards",
+        "date": "October 2026",
+        "isoDate": "2026-09-24T14:00:16.919Z",
+        "readTime": "4 min read",
+        "badge": "Policy & Standards",
+        "status": "Active Communication",
+        "summary": "Salama Estates maintains a comprehensive cybersecurity and security monitoring framework designed to protect residents, staff, properties, information systems, and community facilities. Our approach combines access controls, security monitoring, system logging, incident detection, and appropriate physical security measures to identify and respond to unauthorized access, suspicious activity, and potential security incidents.",
+        "image": "https://cybersecurityasia.net/wp-content/uploads/2025/10/CYBER-780x470.png",
+        "gallery": [],
+        "tags": ["Policy & Standards", "Announcement"],
+        "sections": [
+          {
+            "heading": "Overview & Strategic Context",
+            "body": "Salama Estates maintains a comprehensive cybersecurity and security monitoring framework designed to protect residents, staff, properties, information systems, and community facilities. Our approach combines access controls, security monitoring, system logging, incident detection, and appropriate physical security measures to identify and respond to unauthorized access, suspicious activity, and potential security incidents."
+          },
+          {
+            "heading": "Security Monitoring & Logging",
+            "body": "Salama Estates maintains security logs and monitoring capabilities to help identify unauthorized access, suspicious activity, system failures, and potential cybersecurity incidents.\n\nDepending on the system, security logs may record events such as authentication attempts, successful and unsuccessful logins, account changes, administrative activity, system alerts, access to protected resources, network security events, and other relevant security information.\n\nSecurity logs are reviewed through automated alerts, security monitoring tools, and authorized personnel. Monitoring is performed for legitimate security, operational, compliance, and incident-response purposes.\n\nLog access is restricted to authorized personnel with a legitimate business or security requirement. Logs may be retained for an appropriate period based on legal, regulatory, operational, and security requirements."
+          },
+          {
+            "heading": "Unauthorized Access & Trespassing",
+            "body": "Salama Estates uses appropriate physical and technological security measures to help identify unauthorized access to controlled areas and property.\n\nDepending on the location and applicable requirements, security measures may include access-control systems, entry records, security cameras, alarms, visitor-management systems, security personnel, and other monitoring technologies.\n\nWhen an unauthorized person is detected in a restricted area, relevant security information may be reviewed to establish what occurred, when the event occurred, which access point or system was involved, and what response is appropriate.\n\nSecurity personnel and authorized management may review relevant access records and surveillance information when investigating suspected trespassing, unauthorized entry, property damage, theft, or other security incidents.\n\nMonitoring does not replace emergency services or law enforcement. Where an incident presents an immediate threat to people or property, appropriate emergency procedures will be followed."
+          },
+          {
+            "heading": "Access Control",
+            "body": "Access to Salama Estates systems, facilities, applications, and sensitive information is controlled according to the principle of least privilege.\n\nUsers receive only the access required to perform their authorized responsibilities. Access rights may be reviewed periodically and should be removed or modified when an individual's role changes or access is no longer required.\n\nAdministrative accounts receive additional protection because they can provide elevated access to systems and security configurations.\n\nWhere supported, Salama Estates may use multi-factor authentication, strong password requirements, account monitoring, device controls, and other authentication safeguards."
+          },
+          {
+            "heading": "Log & Evidence Protection",
+            "body": "Security logs, access records, video footage, alerts, incident reports, and other security evidence are protected against unauthorized access, alteration, or disclosure.\n\nWhere appropriate, security records may be preserved as part of an incident investigation. Access to such records is restricted to authorized personnel with a legitimate need to review them.\n\nInformation collected during an investigation is handled responsibly and only used for legitimate security, operational, legal, compliance, or investigative purposes."
+          },
+          {
+            "heading": "Privacy & Responsible Monitoring",
+            "body": "Salama Estates recognizes that effective security monitoring must be balanced with respect for privacy and applicable laws and regulations.\n\nMonitoring activities are intended to protect people, property, systems, and information. Salama Estates seeks to limit collection and access to information to what is reasonably necessary for legitimate security and operational purposes.\n\nPersonal information and security records are handled according to applicable privacy requirements and internal policies. Security information is not made publicly available simply because it has been collected for monitoring purposes."
+          },
+          {
+            "heading": "Continuous Improvement",
+            "body": "Salama Estates periodically reviews its cybersecurity and physical security controls to identify opportunities for improvement.\n\nSecurity practices may be updated in response to emerging threats, changes in technology, security incidents, regulatory requirements, operational changes, and lessons learned from previous investigations.\n\nThe objective is to maintain a security environment that continuously improves the protection of Salama Estates communities, properties, people, information, and technology."
+          }
+        ]
+      },
       {
         "id": "platform-launch-initiative",
         "slug": "platform-launch-initiative",
@@ -1970,14 +2038,32 @@
           if (res.ok) {
             const htmlText = await res.text();
             const doc = new DOMParser().parseFromString(htmlText, 'text/html');
-            const secNodes = doc.querySelectorAll('section[id^="section-"]');
+            const articleBody = doc.querySelector('.article-body') || doc.body;
+            const secNodes = articleBody.querySelectorAll('section');
             if (secNodes.length > 0) {
-              sections = Array.from(secNodes).map(sec => {
+              const parsed = [];
+              secNodes.forEach(sec => {
+                if (sec.id === 'summary-section' || sec.id === 'statement' || sec.id === 'quick-links') return;
                 const h = sec.querySelector('h2, h3');
-                const heading = h ? h.innerText.replace(/^\d+[\.\)]\s*/, '') : 'Section';
-                const paragraphs = Array.from(sec.querySelectorAll('p')).map(p => p.innerHTML.replace(/<br\s*[\/]?>/gi, '\n')).join('\n\n');
-                return { heading, body: paragraphs };
+                if (!h) return;
+                const heading = h.innerText.replace(/^\d+[\.\)]\s*/, '').trim();
+                const clone = sec.cloneNode(true);
+                const cloneH = clone.querySelector('h2, h3');
+                if (cloneH) cloneH.remove();
+                
+                const paragraphs = Array.from(clone.querySelectorAll('p')).map(p => p.innerHTML.trim());
+                let bodyContent = '';
+                if (paragraphs.length > 0 && clone.querySelectorAll('.checklist-grid, .faq-list, table, blockquote').length === 0) {
+                  bodyContent = paragraphs.join('\n\n');
+                } else {
+                  bodyContent = clone.innerHTML.trim();
+                }
+                
+                if (bodyContent) {
+                  parsed.push({ heading, body: bodyContent });
+                }
               });
+              if (parsed.length > 0) sections = parsed;
             }
             if (!art.quote) {
               const bq = doc.querySelector('blockquote');
