@@ -11,6 +11,14 @@
 (function () {
   'use strict';
 
+  // CRITICAL: NEVER run SPA router, URL cleaner, or DOM wrappers on admin.html!
+  if (window.location.pathname.toLowerCase().includes('admin')) {
+    try {
+      sessionStorage.removeItem('salama_active_url');
+    } catch (e) {}
+    return;
+  }
+
   // State
   let isTransitioning = false;
 
@@ -40,6 +48,14 @@
       const loc = window.location;
       if (loc.pathname && loc.pathname !== '/' && loc.pathname !== '') {
         const rawPath = loc.pathname.replace(/^\/+/, '');
+        // NEVER clean or touch admin routes!
+        if (rawPath.toLowerCase().includes('admin')) {
+          try {
+            sessionStorage.removeItem('salama_active_url');
+          } catch(e) {}
+          return;
+        }
+
         // Keep in session storage so refresh preserves place
         try {
           if (!sessionStorage.getItem('salama_active_url')) {
@@ -465,7 +481,10 @@
     }
 
     // Direct bypass for Admin Studio or external URLs
-    if (targetUrl.includes('admin.html') || targetUrl.startsWith('http://') || targetUrl.startsWith('https://')) {
+    if (targetUrl.toLowerCase().includes('admin') || targetUrl.startsWith('http://') || targetUrl.startsWith('https://')) {
+      try {
+        sessionStorage.removeItem('salama_active_url');
+      } catch (e) {}
       window.location.href = targetUrl;
       return;
     }
@@ -638,7 +657,10 @@
         }
 
         // Exclude admin publishing studio
-        if (trimmed.includes('admin.html')) {
+        if (trimmed.toLowerCase().includes('admin')) {
+          try {
+            sessionStorage.removeItem('salama_active_url');
+          } catch (e) {}
           return;
         }
 
@@ -704,7 +726,9 @@
     // If on root index.html and session storage has an active view (from immediate reload), restore it smoothly
     try {
       const saved = sessionStorage.getItem('salama_active_url');
-      if (
+      if (saved && saved.toLowerCase().includes('admin')) {
+        sessionStorage.removeItem('salama_active_url');
+      } else if (
         saved &&
         saved !== 'index.html' &&
         saved !== '' &&

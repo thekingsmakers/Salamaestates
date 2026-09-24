@@ -757,8 +757,9 @@
 
   </main>
 
-  <script src="assets/js/main.js"></script>
   <script>
+    // Clean any portal SPA routing state so admin workspace is completely isolated
+    try { sessionStorage.removeItem('salama_active_url'); } catch(e) {}
     let currentEditingSlug = null;
     let generatedArticleData = null;
     let generatedHtmlContent = '';
@@ -2565,6 +2566,15 @@
 
       // 3. Update articles.json on GitHub
       await updateGitHubArticlesJson(owner, repo, null, token, true, slug);
+    }
+
+    // Header menu toggle for mobile
+    const adminMenuBtn = document.querySelector('.site-header .menu-toggle');
+    const adminNavLinks = document.querySelector('.site-header .nav-links');
+    if (adminMenuBtn && adminNavLinks) {
+      adminMenuBtn.addEventListener('click', () => {
+        adminNavLinks.classList.toggle('show');
+      });
     }
   </script>
 </body>

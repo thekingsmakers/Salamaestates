@@ -9,8 +9,12 @@
     (function() {
       try {
         var rawPath = window.location.pathname.replace(/^\/+/, '');
+        if (rawPath.toLowerCase().includes('admin')) {
+          sessionStorage.removeItem('salama_active_url');
+          window.location.replace('/admin.html');
+          return;
+        }
         if (rawPath && rawPath !== '404.html') {
-          // If the path was for an article or section, try resolving
           sessionStorage.setItem('salama_active_url', rawPath);
         }
       } catch (e) {}
