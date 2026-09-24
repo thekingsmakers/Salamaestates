@@ -119,8 +119,51 @@ const SalamaAuth = (function () {
     return pureSha256(message);
   }
 
+  const _memStore = {};
+  function safeGet(key, preferSession) {
+    try {
+      if (preferSession && typeof sessionStorage !== 'undefined') {
+        const val = sessionStorage.getItem(key);
+        if (val !== null) return val;
+      }
+      if (typeof localStorage !== 'undefined') {
+        const val = localStorage.getItem(key);
+        if (val !== null) return val;
+      }
+    } catch (e) {}
+    return _memStore[key] || null;
+  }
+
+  function safeSet(key, val, toSession) {
+    _memStore[key] = val;
+    try {
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem(key, val);
+      }
+    } catch (e) {}
+    try {
+      if (toSession && typeof sessionStorage !== 'undefined') {
+        sessionStorage.setItem(key, val);
+      }
+    } catch (e) {}
+  }
+
+  function safeRemove(key) {
+    delete _memStore[key];
+    try {
+      if (typeof localStorage !== 'undefined') {
+        localStorage.removeItem(key);
+      }
+    } catch (e) {}
+    try {
+      if (typeof sessionStorage !== 'undefined') {
+        sessionStorage.removeItem(key);
+      }
+    } catch (e) {}
+  }
+
   function getStoredHash() {
-    return localStorage.getItem(STORAGE_KEY_HASH) || DEFAULT_HASH;
+    return safeGet(STORAGE_KEY_HASH) || DEFAULT_HASH;
   }
 
   /**
@@ -130,49 +173,49 @@ const SalamaAuth = (function () {
     if (typeof password !== 'string' || !password.length) return false;
     try {
       const clean = password.trim();
-      const hashClean = await sha256(clean);
-      const hashRaw = await sha256(password);
       const lower = clean.toLowerCase();
 
       // Direct match for default credentials
       if (lower === 'salama2026' || lower === 'salama') {
-        localStorage.setItem(STORAGE_KEY_HASH, DEFAULT_HASH);
+        safeSet(STORAGE_KEY_HASH, DEFAULT_HASH);
         return true;
       }
 
-      const storedHash = localStorage.getItem(STORAGE_KEY_HASH);
+      const hashClean = await sha256(clean);
+      const hashRaw = await sha256(password);
+      const storedHash = safeGet(STORAGE_KEY_HASH);
 
       const matchesDefault = (hashClean === DEFAULT_HASH || hashRaw === DEFAULT_HASH);
       const matchesStored = storedHash && (hashClean === storedHash || hashRaw === storedHash);
 
       if (matchesDefault || matchesStored) {
-        // If it matches DEFAULT_HASH, heal any stale localStorage value
+        // If it matches DEFAULT_HASH, heal any stale stored value
         if (matchesDefault && storedHash !== DEFAULT_HASH) {
-          localStorage.setItem(STORAGE_KEY_HASH, DEFAULT_HASH);
+          safeSet(STORAGE_KEY_HASH, DEFAULT_HASH);
         }
         return true;
       }
       return false;
     } catch (err) {
       console.error('Password verification error:', err);
+      // Fallback check on trimmed password
+      if (password.trim().toLowerCase() === 'salama2026') return true;
       return false;
     }
   }
 
   function isAdminAuthenticated() {
     return (
-      localStorage.getItem(STORAGE_KEY_ADMIN_SESSION) === 'true' ||
-      sessionStorage.getItem(STORAGE_KEY_ADMIN_SESSION) === 'true'
+      safeGet(STORAGE_KEY_ADMIN_SESSION, true) === 'true' ||
+      safeGet(STORAGE_KEY_ADMIN_SESSION) === 'true'
     );
   }
 
   function setAdminAuthenticated(status) {
     if (status) {
-      localStorage.setItem(STORAGE_KEY_ADMIN_SESSION, 'true');
-      sessionStorage.setItem(STORAGE_KEY_ADMIN_SESSION, 'true');
+      safeSet(STORAGE_KEY_ADMIN_SESSION, 'true', true);
     } else {
-      localStorage.removeItem(STORAGE_KEY_ADMIN_SESSION);
-      sessionStorage.removeItem(STORAGE_KEY_ADMIN_SESSION);
+      safeRemove(STORAGE_KEY_ADMIN_SESSION);
     }
   }
 
@@ -186,36 +229,35 @@ const SalamaAuth = (function () {
       throw new Error('New password must be at least 6 characters long.');
     }
     const newHash = await sha256(cleanNew);
-    localStorage.setItem(STORAGE_KEY_HASH, newHash);
+    safeSet(STORAGE_KEY_HASH, newHash);
     return true;
   }
 
   function resetToDefaultPassword() {
-    localStorage.removeItem(STORAGE_KEY_HASH);
-    localStorage.removeItem(STORAGE_KEY_ADMIN_SESSION);
-    sessionStorage.removeItem(STORAGE_KEY_ADMIN_SESSION);
-    sessionStorage.removeItem(STORAGE_KEY_SITE_SESSION);
+    safeRemove(STORAGE_KEY_HASH);
+    safeRemove(STORAGE_KEY_ADMIN_SESSION);
+    safeRemove(STORAGE_KEY_SITE_SESSION);
     return true;
   }
 
   function isSiteLockEnabled() {
-    return localStorage.getItem(STORAGE_KEY_SITE_LOCK) === 'true';
+    return safeGet(STORAGE_KEY_SITE_LOCK) === 'true';
   }
 
   function setSiteLockEnabled(enabled) {
-    localStorage.setItem(STORAGE_KEY_SITE_LOCK, enabled ? 'true' : 'false');
+    safeSet(STORAGE_KEY_SITE_LOCK, enabled ? 'true' : 'false');
   }
 
   function isSiteAuthenticated() {
     if (!isSiteLockEnabled()) return true;
-    return sessionStorage.getItem(STORAGE_KEY_SITE_SESSION) === 'true';
+    return safeGet(STORAGE_KEY_SITE_SESSION, true) === 'true' || safeGet(STORAGE_KEY_SITE_SESSION) === 'true';
   }
 
   function setSiteAuthenticated(status) {
     if (status) {
-      sessionStorage.setItem(STORAGE_KEY_SITE_SESSION, 'true');
+      safeSet(STORAGE_KEY_SITE_SESSION, 'true', true);
     } else {
-      sessionStorage.removeItem(STORAGE_KEY_SITE_SESSION);
+      safeRemove(STORAGE_KEY_SITE_SESSION);
     }
   }
 
@@ -297,3 +339,7 @@ const SalamaAuth = (function () {
     DEFAULT_HASH
   };
 })();
+
+if (typeof window !== 'undefined') {
+  window.SalamaAuth = SalamaAuth;
+}
