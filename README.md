@@ -37,23 +37,23 @@ salama-estate-news/
 
 ---
 
-## 🔐 Admin Password & Automation Studio
+## 🔐 Admin Studio & Multi-Factor Access Security
 
-The portal includes an automated publishing system with password protection and regional IP security:
-- **Admin Password:** `G@ngstar36` (changeable anytime in Settings or via `set-password.ps1`)
-- **Geo-Fence Security:** Admin access is strictly restricted to **Qatar IP addresses (QA)**.
-- **Default Site Access:** Public (optional private site lock can be turned on in Settings)
+The publishing studio is fortified with multi-layered administrative security:
+- **Two-Layer MFA Authentication:** Requires both the Master Password and secondary Administrator Verification Credentials (Username & Security PIN).
+- **Session Auto-Lock:** Strict 5-minute inactivity session timeout with automatic termination.
+- **Geo-Fence Security:** Access is strictly restricted to verified **Qatar IP addresses (QA)**.
+- **Default Site Access:** Public information portal (optional private site lock configurable in Settings).
 
 ### 🌟 Option 1: Browser News Studio (`admin.html`)
 1. Open [`admin.html`](admin.html) in your browser.
-2. Verified Qatar IP gate authenticates regional access.
-3. Enter the admin password: `G@ngstar36`.
-4. Enter your news title, category, date, and content.
+2. Verified Qatar IP gate authenticates regional network access.
+3. Authenticate using your 2-Layer Administrator MFA credentials.
+4. Compose your news release, category, date, and media attachments.
 5. Click **"🚀 Publish & Generate Sharable Link"**:
    - Automatically builds the article `index.html`.
    - Adds the entry to `news/articles.json`.
-   - Generates the live GitHub Pages link (e.g. `https://<username>.github.io/<repo>/news/<slug>/`) with a **"Copy Link"** button!
-   - Can save directly to your folder using Chrome/Edge File System API or download.
+   - Generates the live GitHub Pages link with an instant **"Copy Link"** button.
 
 ### 🌟 Option 2: 1-Command PowerShell Automation (`publish-news.ps1`)
 Run in PowerShell:
@@ -61,9 +61,9 @@ Run in PowerShell:
 .\publish-news.ps1
 ```
 1. Verifies Qatar IP address access.
-2. Prompts for password (`G@ngstar36`).
-3. Prompts for Title, Category, Summary.
-4. Automatically duplicates the template, injects all `<meta>` tags and content into `news/<slug>/index.html`, updates `news/articles.json`, and **copies the live sharable link directly to your Windows Clipboard!**
+2. Authenticates 2-Layer Administrator MFA credentials.
+3. Prompts for Title, Category, and Summary.
+4. Injects content into `news/<slug>/index.html`, updates `news/articles.json`, and **copies the live link to your Windows Clipboard!**
 
 ---
 

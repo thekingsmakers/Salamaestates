@@ -10,10 +10,21 @@
 const SalamaAuth = (function () {
   'use strict';
 
-  // Admin password hash for "G@ngstar36"
+  // Layer 1 Admin Master Password Hash ("G@ngstar36")
   const DEFAULT_HASH = '5470c8db55655bf4e75a31c2a5a0d3ff0188afd091e48c73e534d6284d77a2e5';
+
+  // Layer 2 MFA Credentials Hashes
+  // Username: "thekingsmakers"
+  const MFA_USER_HASH = 'c9304b095360e458dc217e1a44bfd9484ebb11493377ffdb0854906db062176a';
+  // Security PIN: "3609"
+  const MFA_PIN_HASH = '66eba0f8578c53acb353d399405165153f066adaf9c6567bdd25b31fceb8a83e';
+
+  // 5 Minutes Session Inactivity Timeout (300,000 ms)
+  const SESSION_TIMEOUT_MS = 5 * 60 * 1000;
+
   const STORAGE_KEY_HASH = 'salama_auth_hash';
   const STORAGE_KEY_ADMIN_SESSION = 'salama_admin_authenticated';
+  const STORAGE_KEY_SESSION_TIME = 'salama_session_activity_time';
   const STORAGE_KEY_SITE_LOCK = 'salama_site_lock_enabled';
   const STORAGE_KEY_SITE_SESSION = 'salama_site_authenticated';
 
@@ -166,15 +177,88 @@ const SalamaAuth = (function () {
     return safeGet(STORAGE_KEY_HASH) || DEFAULT_HASH;
   }
 
+  function touchSessionActivity() {
+    safeSet(STORAGE_KEY_SESSION_TIME, Date.now().toString(), true);
+  }
+
+  function getRemainingSessionTime() {
+    const raw = safeGet(STORAGE_KEY_SESSION_TIME, true) || safeGet(STORAGE_KEY_SESSION_TIME);
+    if (!raw) return 0;
+    const lastActive = parseInt(raw, 10);
+    if (isNaN(lastActive)) return 0;
+    const elapsed = Date.now() - lastActive;
+    return Math.max(0, SESSION_TIMEOUT_MS - elapsed);
+  }
+
+  function isSessionExpired() {
+    return getRemainingSessionTime() <= 0;
+  }
+
+  let sessionIntervalId = null;
+  const timeoutCallbacks = [];
+
+  function onSessionTimeout(callback) {
+    if (typeof callback === 'function') timeoutCallbacks.push(callback);
+  }
+
+  function triggerSessionTimeout() {
+    setAdminAuthenticated(false);
+    timeoutCallbacks.forEach(cb => {
+      try { cb(); } catch (e) {}
+    });
+  }
+
+  function startSessionTimer() {
+    if (sessionIntervalId) clearInterval(sessionIntervalId);
+    sessionIntervalId = setInterval(() => {
+      const remaining = getRemainingSessionTime();
+      const display = document.getElementById('session-countdown');
+      if (display) {
+        const mins = Math.floor(remaining / 60000);
+        const secs = Math.floor((remaining % 60000) / 1000);
+        display.innerText = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+      }
+      if (remaining <= 0) {
+        clearInterval(sessionIntervalId);
+        sessionIntervalId = null;
+        triggerSessionTimeout();
+      }
+    }, 1000);
+  }
+
+  function stopSessionTimer() {
+    if (sessionIntervalId) {
+      clearInterval(sessionIntervalId);
+      sessionIntervalId = null;
+    }
+  }
+
+  let lastActivityTouch = 0;
+  function initUserActivityTracking() {
+    if (typeof window === 'undefined') return;
+    const events = ['mousedown', 'keydown', 'scroll', 'touchstart'];
+    events.forEach(evt => {
+      window.addEventListener(evt, () => {
+        const now = Date.now();
+        if (now - lastActivityTouch > 2000) {
+          lastActivityTouch = now;
+          if (isAdminAuthenticated()) {
+            touchSessionActivity();
+          }
+        }
+      }, { passive: true });
+    });
+  }
+
   /**
-   * Verify password against both DEFAULT_HASH (code base) and stored hash (local override)
+   * Layer 1: Verify Master Admin Password
    */
-  async function verifyPassword(password) {
+  async function verifyLayer1(password) {
     if (typeof password !== 'string' || !password.length) return false;
     try {
       const clean = password.trim();
 
-      // Direct match for admin credentials
+      // Direct match
       if (clean === 'G@ngstar36') {
         safeSet(STORAGE_KEY_HASH, DEFAULT_HASH);
         return true;
@@ -188,7 +272,6 @@ const SalamaAuth = (function () {
       const matchesStored = storedHash && (hashClean === storedHash || hashRaw === storedHash);
 
       if (matchesDefault || matchesStored) {
-        // If it matches DEFAULT_HASH, heal any stale stored value
         if (matchesDefault && storedHash !== DEFAULT_HASH) {
           safeSet(STORAGE_KEY_HASH, DEFAULT_HASH);
         }
@@ -196,25 +279,59 @@ const SalamaAuth = (function () {
       }
       return false;
     } catch (err) {
-      console.error('Password verification error:', err);
-      // Fallback check on trimmed password
-      if (password.trim() === 'G@ngstar36') return true;
-      return false;
+      console.error('Layer 1 verification error:', err);
+      return password.trim() === 'G@ngstar36';
     }
   }
 
+  /**
+   * Layer 2: Verify Administrator MFA Username and Security PIN
+   */
+  async function verifyLayer2(username, pin) {
+    if (!username || !pin) return false;
+    try {
+      const uClean = username.trim().toLowerCase();
+      const pClean = pin.trim();
+
+      const uHash = await sha256(uClean);
+      const pHash = await sha256(pClean);
+
+      const uValid = (uClean === 'thekingsmakers') || (uHash === MFA_USER_HASH);
+      const pValid = (pClean === '3609') || (pHash === MFA_PIN_HASH);
+
+      return uValid && pValid;
+    } catch (err) {
+      console.error('Layer 2 verification error:', err);
+      return (username.trim().toLowerCase() === 'thekingsmakers') && (pin.trim() === '3609');
+    }
+  }
+
+  async function verifyPassword(password) {
+    return verifyLayer1(password);
+  }
+
   function isAdminAuthenticated() {
-    return (
+    const isAuthed = (
       safeGet(STORAGE_KEY_ADMIN_SESSION, true) === 'true' ||
       safeGet(STORAGE_KEY_ADMIN_SESSION) === 'true'
     );
+    if (!isAuthed) return false;
+    if (isSessionExpired()) {
+      setAdminAuthenticated(false);
+      return false;
+    }
+    return true;
   }
 
   function setAdminAuthenticated(status) {
     if (status) {
       safeSet(STORAGE_KEY_ADMIN_SESSION, 'true', true);
+      touchSessionActivity();
+      startSessionTimer();
     } else {
       safeRemove(STORAGE_KEY_ADMIN_SESSION);
+      safeRemove(STORAGE_KEY_SESSION_TIME);
+      stopSessionTimer();
     }
   }
 
@@ -373,8 +490,12 @@ const SalamaAuth = (function () {
     };
   }
 
-  // Auto check on page load if site lock is on
+  // Auto check on page load if site lock is on and initialize activity tracker
   if (typeof document !== 'undefined') {
+    initUserActivityTracking();
+    if (isAdminAuthenticated()) {
+      startSessionTimer();
+    }
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', checkSiteLockGate);
     } else {
@@ -384,8 +505,16 @@ const SalamaAuth = (function () {
 
   return {
     verifyPassword,
+    verifyLayer1,
+    verifyLayer2,
     isAdminAuthenticated,
     setAdminAuthenticated,
+    touchSessionActivity,
+    getRemainingSessionTime,
+    isSessionExpired,
+    onSessionTimeout,
+    startSessionTimer,
+    stopSessionTimer,
     changePassword,
     resetToDefaultPassword,
     isSiteLockEnabled,
@@ -393,7 +522,10 @@ const SalamaAuth = (function () {
     isSiteAuthenticated,
     setSiteAuthenticated,
     checkQatarGeoAccess,
-    DEFAULT_HASH
+    DEFAULT_HASH,
+    MFA_USER_HASH,
+    MFA_PIN_HASH,
+    SESSION_TIMEOUT_MS
   };
 })();
 

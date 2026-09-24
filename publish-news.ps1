@@ -24,39 +24,62 @@ Write-Host "  SALAMA ESTATES - AUTOMATED NEWS PUBLISHER STUDIO        " -Foregro
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host ""
 
-# 0. Qatar IP Geolocation Gate
-Write-Host "Verifying regional IP access..." -ForegroundColor Gray
+# 0. Regional Security Gate
+Write-Host "Verifying regional security gate..." -ForegroundColor Gray
 try {
     $Geo = Invoke-RestMethod -Uri "https://api.country.is/" -TimeoutSec 4 -ErrorAction Stop
     if ($Geo.country -ne "QA") {
-        Write-Host "[Access Denied] Admin access is strictly restricted to Qatar IP addresses (QA)." -ForegroundColor Red
-        Write-Host "Detected Country: $($Geo.country) ($($Geo.ip))" -ForegroundColor Red
+        Write-Host ""
+        Write-Host "[Access Restricted] Your country has been restricted. Please contact platform administration." -ForegroundColor Red
+        Write-Host "Help Center - Salama Estates: https://salamaestates.com/help" -ForegroundColor Yellow
+        Write-Host ""
         exit 1
     }
-    Write-Host "[Verified] Qatar IP Verified: $($Geo.ip)" -ForegroundColor Green
+    Write-Host "[Verified] Secure network connection established." -ForegroundColor Green
     Write-Host ""
 } catch {
     Write-Host "[Notice] Geo-check offline or local network. Proceeding." -ForegroundColor Gray
     Write-Host ""
 }
 
-# 1. Password Verification
-$ExpectedHash = "5470c8db55655bf4e75a31c2a5a0d3ff0188afd091e48c73e534d6284d77a2e5" # G@ngstar36
+# 1. Two-Layer Multi-Factor Authentication (MFA)
+$Layer1Hash = "5470c8db55655bf4e75a31c2a5a0d3ff0188afd091e48c73e534d6284d77a2e5"
+$MfaUserHash = "c9304b095360e458dc217e1a44bfd9484ebb11493377ffdb0854906db062176a"
+$MfaPinHash  = "66eba0f8578c53acb353d399405165153f066adaf9c6567bdd25b31fceb8a83e"
 
-$PasswordInput = Read-Host "Enter Admin Password" -AsSecureString
+$Hasher = [System.Security.Cryptography.SHA256]::Create()
+function Compute-Sha256($val) {
+    $bytes = [System.Text.Encoding]::UTF8.GetBytes($val)
+    return [BitConverter]::ToString($Hasher.ComputeHash($bytes)).Replace("-", "").ToLower()
+}
+
+Write-Host "--- Layer 1: Master Key ---" -ForegroundColor Cyan
+$PasswordInput = Read-Host "Enter Master Admin Password" -AsSecureString
 $BSTR = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($PasswordInput)
 $PlainPassword = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($BSTR)
 
-$Hasher = [System.Security.Cryptography.SHA256]::Create()
-$Bytes = [System.Text.Encoding]::UTF8.GetBytes($PlainPassword)
-$Hash = [BitConverter]::ToString($Hasher.ComputeHash($Bytes)).Replace("-", "").ToLower()
+if ((Compute-Sha256 $PlainPassword) -ne $Layer1Hash) {
+    Write-Host "[Error] Incorrect master password. Access denied." -ForegroundColor Red
+    exit 1
+}
+Write-Host "[Verified] Layer 1 Authenticated!" -ForegroundColor Green
+Write-Host ""
 
-if ($Hash -ne $ExpectedHash) {
-    Write-Host "[Error] Incorrect password. Access denied." -ForegroundColor Red
+Write-Host "--- Layer 2: MFA Credentials ---" -ForegroundColor Cyan
+$AdminUser = Read-Host "Enter Administrator Username"
+$PinInput = Read-Host "Enter 4-Digit Security PIN" -AsSecureString
+$BSTR2 = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($PinInput)
+$PlainPin = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($BSTR2)
+
+$UserValid = (Compute-Sha256 ($AdminUser.Trim().ToLower())) -eq $MfaUserHash
+$PinValid = (Compute-Sha256 ($PlainPin.Trim())) -eq $MfaPinHash
+
+if (-not ($UserValid -and $PinValid)) {
+    Write-Host "[Error] Invalid administrator username or security PIN. Access denied." -ForegroundColor Red
     exit 1
 }
 
-Write-Host "[Success] Access granted!" -ForegroundColor Green
+Write-Host "[Success] MFA Authenticated! Access granted." -ForegroundColor Green
 Write-Host ""
 
 # 2. Gather Article Information
