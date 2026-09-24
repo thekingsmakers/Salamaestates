@@ -1,18 +1,18 @@
 [
   {
-    "id": "policy and standards",
-    "slug": "policy and standards",
-    "path": "news/policy and standards/index.html",
+    "id": "policy-and-standards",
+    "slug": "policy-and-standards",
+    "path": "news/policy-and-standards/index.html",
     "title": "Salama Estates Cybersecurity & Security Monitoring Policy",
     "category": "Policy & Standards",
-    "categorySlug": "policy---standards",
+    "categorySlug": "policy-and-standards",
     "date": "October 2026",
     "isoDate": "2026-09-24T13:55:13.703Z",
     "readTime": "4 min read",
-    "badge": "policy and standards",
+    "badge": "Policy & Standards",
     "status": "Active Communication",
     "summary": "Salama Estates maintains a comprehensive cybersecurity and security monitoring framework designed to protect residents, staff, properties, information systems, and community facilities. Our approach combines access controls, security monitoring, system logging, incident detection, and appropriate physical security measures to identify and respond to unauthorized access, suspicious activity, and potential security incidents.",
-    "image": "",
+    "image": "assets/images/marketplace-launch-banner.svg",
     "gallery": [],
     "tags": [
       "Policy & Standards",
@@ -22,7 +22,7 @@
   {
     "id": "platform-launch-initiative",
     "slug": "platform-launch-initiative",
-    "path": "platform-launch-initiative/index.html",
+    "path": "news/platform-launch-initiative/index.html",
     "image": "assets/images/marketplace-launch-banner.svg",
     "title": "Platform Launch Initiative: Building the Largest Property Marketplace",
     "subtitle": "Platform News & Announcements",
