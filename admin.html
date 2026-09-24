@@ -167,8 +167,8 @@
   <!-- Password Protection Gate Modal -->
   <div id="auth-modal" class="modal-overlay" style="display: flex;">
     <div class="modal-box">
-      <div style="width: 56px; height: 56px; background: var(--teal-100); color: var(--teal-700); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 24px;">
-        🔐
+      <div style="width: 56px; height: 56px; background: var(--teal-100); color: var(--teal-700); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
       </div>
       <h2 style="font-size: 1.4rem; color: var(--slate-900); margin-bottom: 6px;">News Studio Login</h2>
       <p style="font-size: 0.88rem; color: var(--slate-600); margin-bottom: 20px;">
@@ -180,13 +180,13 @@
           type="password"
           id="admin-password-input"
           class="search-input"
-          placeholder="Default password: salama2026"
+          placeholder="Enter admin password"
           style="padding-left: 14px; margin-bottom: 10px;"
           required
           autofocus
         >
         <div id="login-error" style="color: var(--red-600); font-size: 0.85rem; margin-bottom: 12px; display: none;">
-          Incorrect password. (Default is <code>salama2026</code>)
+          Incorrect password. Please try again.
         </div>
         <button type="submit" class="action-btn" style="width: 100%; justify-content: center;">
           Unlock News Studio &rarr;
@@ -228,15 +228,15 @@
   <main class="admin-layout" id="admin-workspace" style="display: none;">
 
     <div class="hero-badge-row" style="margin-bottom: 20px;">
-      <span class="badge-tag badge-primary">⚡ Automation Studio</span>
-      <span class="badge-tag badge-status">Password Authenticated</span>
+      <span class="badge-tag badge-primary">Automation Studio</span>
+      <span class="badge-tag badge-status">Authenticated</span>
       <span class="badge-tag badge-date">Instant Sharable Links</span>
     </div>
 
     <div class="tab-bar">
-      <button class="tab-btn active" onclick="switchTab('create')">✍️ Publish New Article</button>
-      <button class="tab-btn" onclick="switchTab('existing')">📚 Existing Articles</button>
-      <button class="tab-btn" onclick="switchTab('settings')">⚙️ Security &amp; GitHub Setup</button>
+      <button class="tab-btn active" onclick="switchTab('create')">Publish New Article</button>
+      <button class="tab-btn" onclick="switchTab('existing')">Existing Articles</button>
+      <button class="tab-btn" onclick="switchTab('settings')">Security &amp; Setup</button>
     </div>
 
     <!-- TAB 1: CREATE ARTICLE -->
@@ -321,6 +321,38 @@
               required
             ></textarea>
           </div>
+
+          <!-- Featured Image Upload & URL -->
+          <div class="form-group" style="margin-top: 18px;">
+            <label>Featured Picture / Banner (Optional)</label>
+            <div class="grid-2">
+              <div>
+                <input
+                  type="text"
+                  id="news-img-url"
+                  class="search-input"
+                  style="padding-left: 14px;"
+                  placeholder="Paste image URL or path (e.g. assets/images/...)"
+                  oninput="handleImageUrlInput(this.value)"
+                >
+                <div class="form-hint">Or choose a picture from your computer below</div>
+              </div>
+              <div>
+                <input
+                  type="file"
+                  id="news-img-file"
+                  class="search-input"
+                  accept="image/*"
+                  style="padding: 9px;"
+                  onchange="handleImageFileUpload(event)"
+                >
+              </div>
+            </div>
+            <div id="img-preview-box" style="display: none; margin-top: 12px; position: relative; max-width: 320px;">
+              <img id="img-preview" src="" alt="Featured Picture Preview" style="width: 100%; height: 160px; object-fit: cover; border-radius: var(--radius-md); border: 1px solid var(--color-border);">
+              <button type="button" onclick="clearFeaturedImage()" style="position: absolute; top: 6px; right: 6px; background: rgba(22, 31, 34, 0.75); color: #fff; border: none; border-radius: 50%; width: 26px; height: 26px; cursor: pointer; line-height: 1;">&times;</button>
+            </div>
+          </div>
         </div>
 
         <div class="admin-card">
@@ -355,6 +387,16 @@
           <button type="button" class="action-btn-outline" onclick="addSection()">
             + Add Another Content Section
           </button>
+
+          <!-- Photo Gallery / Shared Pictures -->
+          <div class="form-group" style="margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--color-border-subtle);">
+            <label style="font-size: 1rem; color: var(--slate-900);">Photo Gallery &amp; Shared Pictures (Optional)</label>
+            <p class="form-hint" style="margin-bottom: 12px;">Add additional photos, development renderings, or property pictures to embed within this article.</p>
+            <div id="gallery-container" style="display: flex; flex-direction: column; gap: 12px;"></div>
+            <button type="button" class="action-btn-outline" onclick="addGalleryPhoto()" style="margin-top: 8px;">
+              + Add Picture to Gallery
+            </button>
+          </div>
         </div>
 
         <div class="admin-card">
@@ -367,17 +409,17 @@
 
           <div style="display: flex; gap: 14px; flex-wrap: wrap;">
             <button type="submit" class="action-btn">
-              🚀 Publish &amp; Generate Sharable Link
+              Publish &amp; Generate Sharable Link &rarr;
             </button>
             <button type="button" class="action-btn-outline" onclick="saveDirectlyToDisk()">
-              📁 Save Directly to salama-estate-news Folder (Chrome/Edge)
+              Save Directly to Project Folder
             </button>
           </div>
 
           <!-- SHARABLE LINK OUTPUT BOX -->
           <div id="sharable-link-box" class="link-output-box">
             <h3 style="color: var(--teal-900); font-size: 1.2rem; margin-bottom: 4px;">
-              🎉 Article Published Successfully!
+              Article Published Successfully!
             </h3>
             <p style="font-size: 0.9rem; color: var(--teal-800);">
               Your news has been packaged, registered into <code>articles.json</code>, and added to the automated feed.
@@ -395,13 +437,13 @@
 
             <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px;">
               <button type="button" class="action-btn" onclick="copySharableLink()">
-                📋 Copy Sharable Link
+                Copy Sharable Link
               </button>
               <a id="open-article-btn" href="#" target="_blank" class="action-btn-outline">
-                ↗️ Open Article in New Tab
+                Open Article in New Tab &rarr;
               </a>
               <button type="button" class="action-btn-outline" onclick="downloadArticleFiles()">
-                📥 Download HTML &amp; JSON
+                Download HTML &amp; JSON
               </button>
             </div>
           </div>
@@ -484,6 +526,98 @@
   <script>
     let generatedArticleData = null;
     let generatedHtmlContent = '';
+    let featuredImageData = '';
+
+    // Image upload & URL handlers
+    function handleImageUrlInput(url) {
+      featuredImageData = url.trim();
+      const previewBox = document.getElementById('img-preview-box');
+      const previewImg = document.getElementById('img-preview');
+      if (featuredImageData) {
+        previewImg.src = featuredImageData;
+        previewBox.style.display = 'block';
+      } else {
+        previewBox.style.display = 'none';
+      }
+    }
+
+    function handleImageFileUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        featuredImageData = evt.target.result;
+        document.getElementById('news-img-url').value = '';
+        const previewBox = document.getElementById('img-preview-box');
+        const previewImg = document.getElementById('img-preview');
+        previewImg.src = featuredImageData;
+        previewBox.style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function clearFeaturedImage() {
+      featuredImageData = '';
+      document.getElementById('news-img-url').value = '';
+      document.getElementById('news-img-file').value = '';
+      document.getElementById('img-preview-box').style.display = 'none';
+    }
+
+    // Gallery builder handlers
+    function addGalleryPhoto() {
+      const id = 'gal-' + Date.now();
+      const container = document.getElementById('gallery-container');
+      const div = document.createElement('div');
+      div.className = 'section-block';
+      div.id = id;
+      div.innerHTML = `
+        <button type="button" onclick="document.getElementById('${id}').remove()" style="position: absolute; top: 12px; right: 12px; background: none; border: none; color: var(--red-600); cursor: pointer; font-size: 0.85rem; font-weight: 600;">&times; Remove Photo</button>
+        <div class="grid-2">
+          <div class="form-group">
+            <label>Photo Caption / Description</label>
+            <input type="text" class="search-input gal-caption" placeholder="e.g. Architectural Rendering of Marketplace Center" style="padding-left: 14px;">
+          </div>
+          <div class="form-group">
+            <label>Photo Source (URL or File)</label>
+            <input type="text" class="search-input gal-url" placeholder="Paste image URL or relative path" style="padding-left: 14px; margin-bottom: 6px;" oninput="previewGalPhoto(this, '${id}')">
+            <input type="file" accept="image/*" class="search-input gal-file" style="padding: 6px;" onchange="handleGalFileUpload(event, '${id}')">
+          </div>
+        </div>
+        <div class="gal-preview-container" style="display: none; margin-top: 10px;">
+          <img class="gal-preview-img" src="" alt="Gallery Preview" style="max-height: 140px; border-radius: 6px; border: 1px solid var(--color-border); object-fit: cover;">
+        </div>
+      `;
+      container.appendChild(div);
+    }
+
+    function previewGalPhoto(input, galId) {
+      const box = document.getElementById(galId);
+      const container = box.querySelector('.gal-preview-container');
+      const img = box.querySelector('.gal-preview-img');
+      if (input.value.trim()) {
+        img.src = input.value.trim();
+        container.style.display = 'block';
+      } else {
+        container.style.display = 'none';
+      }
+    }
+
+    function handleGalFileUpload(e, galId) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const box = document.getElementById(galId);
+      const container = box.querySelector('.gal-preview-container');
+      const img = box.querySelector('.gal-preview-img');
+      const urlInput = box.querySelector('.gal-url');
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        img.src = evt.target.result;
+        urlInput.value = '';
+        urlInput.dataset.dataUri = evt.target.result;
+        container.style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+    }
 
     // Check login state
     document.addEventListener('DOMContentLoaded', () => {
@@ -577,14 +711,41 @@
         </section>
       `).join('');
 
-      const tocHtml = data.sections.map((s, idx) => `
+      let tocHtml = data.sections.map((s, idx) => `
         <li><a href="#section-${idx + 1}">${idx + 1}. ${s.heading}</a></li>
       `).join('');
+
+      if (data.gallery && data.gallery.length > 0) {
+        tocHtml += `<li><a href="#gallery-section">Photo Gallery</a></li>`;
+      }
 
       const quoteHtml = data.quote ? `
         <blockquote>
           &ldquo;${data.quote}&rdquo;
         </blockquote>
+      ` : '';
+
+      const heroMediaHtml = data.image ? `
+        <div class="article-hero-media" style="margin: 24px 0 32px;">
+          <img src="${data.image}" alt="${data.title}" style="width: 100%; max-height: 480px; object-fit: cover; border-radius: var(--radius-md); border: 1px solid var(--color-border); box-shadow: var(--shadow-sm);">
+        </div>
+      ` : '';
+
+      const gallerySectionHtml = (data.gallery && data.gallery.length > 0) ? `
+        <section id="gallery-section" style="margin-top: 36px; padding-top: 24px; border-top: 1px solid var(--color-border);">
+          <h2>Photo Gallery &amp; Visual Updates</h2>
+          <p style="color: var(--slate-600); margin-bottom: 20px;">Photographic documentation and media releases associated with this announcement.</p>
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px;">
+            ${data.gallery.map(item => `
+              <figure style="margin: 0; background: var(--slate-50); border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow: hidden; box-shadow: var(--shadow-sm);">
+                <img src="${item.src}" alt="${item.caption}" style="width: 100%; height: 220px; object-fit: cover; display: block;" loading="lazy">
+                <figcaption style="padding: 12px 14px; font-size: 0.88rem; color: var(--slate-700); font-weight: 500; border-top: 1px solid var(--color-border-subtle);">
+                  ${item.caption}
+                </figcaption>
+              </figure>
+            `).join('')}
+          </div>
+        </section>
       ` : '';
 
       return `<!DOCTYPE html>
@@ -601,10 +762,12 @@
   <meta name="news:readTime" content="${data.readTime}">
   <meta name="news:status" content="Verified Communication">
   <meta name="news:badge" content="${data.badge}">
+  <meta name="news:image" content="${data.image || ''}">
   <meta name="description" content="${data.summary}">
   <meta property="og:title" content="${data.title}">
   <meta property="og:description" content="${data.summary}">
   <meta property="og:type" content="article">
+  <meta property="og:image" content="${data.image || ''}">
 
   <link rel="stylesheet" href="../../assets/css/style.css">
   <link rel="icon" href="../../assets/images/logo.svg" type="image/svg+xml">
@@ -627,7 +790,7 @@
           <span>Public Information Portal</span>
         </div>
       </a>
-      <button class="menu-toggle" aria-label="Toggle navigation">&#9776;</button>
+      <button class="menu-toggle" aria-label="Toggle navigation">&equiv;</button>
       <nav>
         <ul class="nav-links">
           <li><a href="../../index.html">Home</a></li>
@@ -656,7 +819,10 @@
         <div class="hero-badge-row">
           <span class="badge-tag badge-primary">${data.category}</span>
           <span class="badge-tag badge-status">${data.badge}</span>
-          <span class="badge-tag badge-date">📅 ${data.date}</span>
+          <span class="badge-tag badge-date">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            ${data.date}
+          </span>
         </div>
 
         <h1 class="article-main-title">${data.title}</h1>
@@ -666,8 +832,13 @@
           <span>&bull;</span>
           <span><strong>Read Time:</strong> ${data.readTime}</span>
           <span>&bull;</span>
-          <span class="official-stamp">✓ Verified Release</span>
+          <span class="official-stamp">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            Verified Release
+          </span>
         </div>
+
+        ${heroMediaHtml}
       </header>
 
       <div class="article-layout-grid">
@@ -695,11 +866,17 @@
 
           ${sectionsHtml}
 
+          ${gallerySectionHtml}
+
           <div class="statement-card" style="margin-top: 40px;">
             <h3>Official Communique</h3>
             <p>
               This publication is issued as part of Salama Estates commitment to community-first transparency and reliable marketplace information.
             </p>
+            <div style="margin-top: 16px; display: flex; gap: 12px; flex-wrap: wrap;">
+              <a href="https://salamaestates.com/login" target="_blank" class="action-btn" style="font-size: 0.88rem; padding: 8px 16px;">Sign In to Marketplace</a>
+              <a href="https://salamaestates.com/help" target="_blank" class="action-btn-outline" style="font-size: 0.88rem; padding: 8px 16px;">Contact Help Desk</a>
+            </div>
           </div>
         </article>
 
@@ -746,6 +923,21 @@
         });
       });
 
+      // Collect gallery photos
+      const gallery = [];
+      document.querySelectorAll('#gallery-container .section-block').forEach(item => {
+        const captionInput = item.querySelector('.gal-caption');
+        const urlInput = item.querySelector('.gal-url');
+        const caption = captionInput ? captionInput.value.trim() : '';
+        const imgUrl = (urlInput && urlInput.dataset.dataUri) ? urlInput.dataset.dataUri : (urlInput ? urlInput.value.trim() : '');
+        if (imgUrl) {
+          gallery.push({
+            src: imgUrl,
+            caption: caption || 'Salama Estates Visual Update'
+          });
+        }
+      });
+
       const articleObj = {
         id: slug,
         slug: slug,
@@ -759,12 +951,16 @@
         badge: badge,
         status: 'Active Communication',
         summary: summary,
+        image: featuredImageData,
+        gallery: gallery,
         tags: [category, 'Announcement']
       };
 
       generatedArticleData = articleObj;
       generatedHtmlContent = buildArticleHtml({
-        title, slug, category, date, readTime, badge, summary, quote, sections
+        title, slug, category, date, readTime, badge, summary, quote, sections,
+        image: featuredImageData,
+        gallery: gallery
       });
 
       // Save to localStorage so it instantly appears in news feed on this device!
@@ -841,7 +1037,7 @@
         await jsonWritable.write(JSON.stringify(articlesList, null, 2));
         await jsonWritable.close();
 
-        alert(`✅ Successfully created news/${generatedArticleData.slug}/index.html and updated news/articles.json on disk!`);
+        alert(`Successfully created news/${generatedArticleData.slug}/index.html and updated news/articles.json on disk!`);
       } catch (err) {
         console.error(err);
         alert('Disk save note: ' + err.message);
@@ -866,7 +1062,7 @@
     function copySharableLink() {
       const url = document.getElementById('sharable-url-display').innerText;
       navigator.clipboard.writeText(url).then(() => {
-        alert('📋 Sharable Link copied to clipboard!\n\n' + url);
+        alert('Sharable Link copied to clipboard!\n\n' + url);
       });
     }
 
@@ -879,7 +1075,7 @@
       try {
         await SalamaAuth.changePassword(oldP, newP);
         msg.style.color = 'var(--green-600)';
-        msg.innerText = '✓ Password updated successfully!';
+        msg.innerText = 'Password updated successfully!';
         document.getElementById('old-pass').value = '';
         document.getElementById('new-pass').value = '';
       } catch (err) {
@@ -890,7 +1086,7 @@
 
     function toggleSiteLock(enabled) {
       SalamaAuth.setSiteLockEnabled(enabled);
-      alert(enabled ? '🔒 Site-wide password lock enabled. Public visitors will now be asked for password.' : '🔓 Site-wide lock disabled. Site is open to public.');
+      alert(enabled ? 'Site-wide password lock enabled. Public visitors will now be asked for password.' : 'Site-wide lock disabled. Site is open to public.');
     }
 
     function saveGhConfig() {
@@ -941,7 +1137,7 @@
             <div style="display: flex; gap: 8px;">
               <a href="${link}" target="_blank" class="action-btn-outline">Open Article &rarr;</a>
               <button class="action-btn-outline" onclick="navigator.clipboard.writeText('${publicUrl}').then(() => alert('Copied: ${publicUrl}'))">
-                📋 Copy Link
+                Copy Link
               </button>
             </div>
           </div>

@@ -114,6 +114,10 @@
       const badge = doc.querySelector('meta[name="news:badge"]')?.content ||
                     articleRef.badge || 'Official';
 
+      const image = doc.querySelector('meta[name="news:image"]')?.content ||
+                    doc.querySelector('meta[property="og:image"]')?.content ||
+                    articleRef.image || '';
+
       return {
         ...articleRef,
         title,
@@ -122,7 +126,8 @@
         date,
         readTime,
         status,
-        badge
+        badge,
+        image
       };
     } catch (e) {
       console.error('Failed to parse HTML for', articleRef.path, e);
@@ -196,7 +201,10 @@
       <div class="article-card featured-card">
         <div class="card-meta-top">
           <span class="card-category">Platform Development</span>
-          <span class="article-date">📅 September 2026 • 5 min read</span>
+          <span class="article-date">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -1px; margin-right: 3px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            September 2026 • 5 min read
+          </span>
         </div>
         <h3 class="card-title">
           <a href="${resolveArticleLink('news/platform-launch-initiative/index.html')}">
@@ -207,9 +215,12 @@
           As part of our mission to create a comprehensive and trusted real estate marketplace, we have introduced a temporary property data acquisition strategy to provide users with meaningful and valuable content from the first day of launch.
         </p>
         <div class="card-footer">
-          <span class="official-stamp">✓ Official Platform Communication</span>
+          <span class="official-stamp">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            Official Platform Communication
+          </span>
           <a class="card-read-more" href="${resolveArticleLink('news/platform-launch-initiative/index.html')}">
-            Read Full Communique & Roadmap &rarr;
+            Read Full Communique &amp; Roadmap &rarr;
           </a>
         </div>
       </div>
@@ -269,6 +280,20 @@
       return;
     }
 
+    function resolveImageLink(imgPath) {
+      if (!imgPath) return '';
+      if (imgPath.startsWith('http://') || imgPath.startsWith('https://') || imgPath.startsWith('data:')) {
+        return imgPath;
+      }
+      if (window.location.pathname.includes('/news/')) {
+        if (imgPath.startsWith('assets/')) return '../' + imgPath;
+        if (imgPath.startsWith('../')) return imgPath;
+        return '../' + imgPath;
+      }
+      if (imgPath.startsWith('./')) return imgPath;
+      return './' + imgPath;
+    }
+
     container.innerHTML = filtered
       .map((art) => {
         const link = resolveArticleLink(art.path || art.slug + '/index.html');
@@ -277,33 +302,56 @@
           ? `<span class="badge-tag badge-primary" style="margin-left: 8px;">${art.badge}</span>`
           : '';
 
+        const cardContent = `
+          <div class="card-meta-top">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span class="card-category">${art.category || 'General'}</span>
+              ${badgeHtml}
+            </div>
+            <span class="article-date">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -1px; margin-right: 3px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              ${art.date || ''} • ${art.readTime || '3 min read'}
+            </span>
+          </div>
+
+          <h3 class="card-title">
+            <a href="${link}">${art.title}</a>
+          </h3>
+
+          <p class="card-summary">
+            ${art.summary || ''}
+          </p>
+
+          <div class="card-footer">
+            <span class="official-stamp">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              ${art.status || 'Verified Communication'}
+            </span>
+            <a class="card-read-more" href="${link}">
+              Read Full Statement &rarr;
+            </a>
+          </div>
+        `;
+
+        if (art.image) {
+          const imgUrl = resolveImageLink(art.image);
+          return `
+            <article class="article-card ${isFeatured}" id="${art.slug || art.id || ''}">
+              <div class="article-card-with-thumb">
+                <div class="article-card-thumb-wrap">
+                  <img src="${imgUrl}" alt="${art.title}" class="article-card-thumb-img" loading="lazy">
+                </div>
+                <div>
+                  ${cardContent}
+                </div>
+              </div>
+            </article>
+          `;
+        }
+
         return `
           <article class="article-card ${isFeatured}" id="${art.slug || art.id || ''}">
-            <div class="card-meta-top">
-              <div style="display: flex; align-items: center; gap: 6px;">
-                <span class="card-category">${art.category || 'General'}</span>
-                ${badgeHtml}
-              </div>
-              <span class="article-date">📅 ${art.date || ''} • ${art.readTime || '3 min read'}</span>
-            </div>
-
-            <h3 class="card-title">
-              <a href="${link}">${art.title}</a>
-            </h3>
-
-            <p class="card-summary">
-              ${art.summary || ''}
-            </p>
-
-            <div class="card-footer">
-              <span class="official-stamp">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                ${art.status || 'Verified Communication'}
-              </span>
-              <a class="card-read-more" href="${link}">
-                Read Full Statement &rarr;
-              </a>
-            </div>
+            ${cardContent}
           </article>
         `;
       })

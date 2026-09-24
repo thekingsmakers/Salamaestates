@@ -3,6 +3,7 @@
     "id": "platform-launch-initiative",
     "slug": "platform-launch-initiative",
     "path": "platform-launch-initiative/index.html",
+    "image": "assets/images/marketplace-launch-banner.svg",
     "title": "Platform Launch Initiative: Building the Largest Property Marketplace",
     "subtitle": "Platform News & Announcements",
     "category": "Platform Development",
@@ -11,7 +12,7 @@
     "isoDate": "2026-09-01",
     "readTime": "5 min read",
     "featured": true,
-    "summary": "As part of our mission to create a comprehensive and trusted real estate marketplace, we have introduced a temporary property data acquisition strategy to provide users with meaningful and valuable content from the first day of launch.",
+    "summary": "As part of our mission to create a comprehensive and trusted real estate marketplace, we have introduced a temporary property data acquisition strategy to provide users with meaningful and valuable content from day one.",
     "status": "Active Platform Growth Initiative",
     "badge": "Official Announcement",
     "tags": ["Marketplace Launch", "Data Accuracy", "Roadmap", "Property Owners", "Agency Verification"]

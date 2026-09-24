@@ -99,8 +99,8 @@ const SalamaAuth = (function () {
 
     overlay.innerHTML = `
       <div style="background: #fff; width: 100%; max-width: 420px; border-radius: 16px; padding: 32px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); text-align: center;">
-        <div style="width: 56px; height: 56px; background: #E0F3F5; color: #0E7D8B; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 24px;">
-          🔒
+        <div style="width: 56px; height: 56px; background: #E0F3F5; color: #0E7D8B; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
         </div>
         <h2 style="font-size: 1.4rem; color: #161F22; margin-bottom: 8px;">Private Access Portal</h2>
         <p style="font-size: 0.9rem; color: #54676D; margin-bottom: 24px;">

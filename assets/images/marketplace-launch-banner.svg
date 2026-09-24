@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630" fill="none">
+  <defs>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#07505A"/>
+      <stop offset="60%" stop-color="#0E7D8B"/>
+      <stop offset="100%" stop-color="#1592A2"/>
+    </linearGradient>
+    <linearGradient id="cardGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0.04"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bgGrad)"/>
+
+  <!-- Architectural geometric lines -->
+  <g opacity="0.15" stroke="#FFFFFF" stroke-width="1.5">
+    <line x1="0" y1="100" x2="1200" y2="100"/>
+    <line x1="0" y1="250" x2="1200" y2="250"/>
+    <line x1="0" y1="400" x2="1200" y2="400"/>
+    <line x1="0" y1="550" x2="1200" y2="550"/>
+    <line x1="200" y1="0" x2="200" y2="630"/>
+    <line x1="500" y1="0" x2="500" y2="630"/>
+    <line x1="800" y1="0" x2="800" y2="630"/>
+    <line x1="1050" y1="0" x2="1050" y2="630"/>
+  </g>
+
+  <!-- Buildings silhouette on right -->
+  <g opacity="0.2" fill="#FFFFFF">
+    <rect x="780" y="240" width="90" height="390" rx="4"/>
+    <rect x="890" y="160" width="110" height="470" rx="4"/>
+    <rect x="1020" y="290" width="85" height="340" rx="4"/>
+    <rect x="700" y="360" width="70" height="270" rx="4"/>
+  </g>
+
+  <!-- Content Container Card -->
+  <rect x="80" y="80" width="740" height="470" rx="24" fill="url(#cardGrad)" stroke="#FFFFFF" stroke-opacity="0.25" stroke-width="1.5"/>
+
+  <!-- Badge -->
+  <rect x="130" y="130" width="280" height="36" rx="18" fill="#31C4D8" fill-opacity="0.25" stroke="#31C4D8" stroke-width="1.5"/>
+  <text x="145" y="153" fill="#E0F3F5" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="700" letter-spacing="1">
+    📰 OFFICIAL PLATFORM RELEASE
+  </text>
+
+  <!-- Title -->
+  <text x="130" y="225" fill="#FFFFFF" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="38" font-weight="800">
+    Platform Launch Initiative
+  </text>
+  <text x="130" y="275" fill="#E0F3F5" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="28" font-weight="600">
+    Building the Largest Property Marketplace
+  </text>
+
+  <!-- Subtitle -->
+  <text x="130" y="340" fill="#CCD4D7" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="18">
+    Transparent property acquisition &bull; Owner direct posting &bull; Verified agencies
+  </text>
+
+  <!-- Stats row -->
+  <g transform="translate(130, 410)">
+    <rect width="160" height="70" rx="12" fill="#07353C" fill-opacity="0.5" stroke="#31C4D8" stroke-opacity="0.3"/>
+    <text x="18" y="30" fill="#31C4D8" font-family="sans-serif" font-size="12" font-weight="700">DATE</text>
+    <text x="18" y="54" fill="#FFFFFF" font-family="sans-serif" font-size="16" font-weight="700">Sept 2026</text>
+
+    <rect x="180" width="200" height="70" rx="12" fill="#07353C" fill-opacity="0.5" stroke="#31C4D8" stroke-opacity="0.3"/>
+    <text x="198" y="30" fill="#31C4D8" font-family="sans-serif" font-size="12" font-weight="700">STATUS</text>
+    <text x="198" y="54" fill="#86efac" font-family="sans-serif" font-size="16" font-weight="700">Active Growth</text>
+
+    <rect x="400" width="220" height="70" rx="12" fill="#07353C" fill-opacity="0.5" stroke="#31C4D8" stroke-opacity="0.3"/>
+    <text x="418" y="30" fill="#31C4D8" font-family="sans-serif" font-size="12" font-weight="700">ECOSYSTEM</text>
+    <text x="418" y="54" fill="#FFFFFF" font-family="sans-serif" font-size="16" font-weight="700">Salama Estates</text>
+  </g>
+</svg>

@@ -26,7 +26,7 @@ Write-Host ""
 # 1. Password Verification
 $ExpectedHash = "732f9678b838fba7561778d948d001d023916f0fde2b36d446a9df3321b61568" # salama2026
 
-$PasswordInput = Read-Host "🔐 Enter Admin Password (default: salama2026)" -AsSecureString
+$PasswordInput = Read-Host "🔐 Enter Admin Password" -AsSecureString
 $BSTR = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($PasswordInput)
 $PlainPassword = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($BSTR)
 
