@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact Us &amp; Agency Verification Desk | Salama Estates</title>
+  
+  <meta name="description" content="Reach Salama Estates official administration for agency verification, property owner onboarding, listing corrections, or general inquiries.">
+  <meta property="og:title" content="Contact Us &amp; Agency Verification Desk | Salama Estates">
+  <meta property="og:description" content="Official inquiry desks for property owners, agencies, buyers, and community stakeholders.">
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="icon" href="assets/images/logo.svg" type="image/svg+xml">
+</head>
+<body>
+
+  <!-- Reading Progress Bar -->
+  <div id="reading-progress"></div>
+
+  <!-- Top Notice -->
+  <aside class="top-notice-bar" aria-label="Announcement">
+    <span class="badge-live">Support &amp; Verification</span>
+    Salama Estates Official Communication Desk &bull; Rapid Response Team
+  </aside>
+
+  <!-- Site Navigation -->
+  <header class="site-header">
+    <div class="nav-container">
+      <a href="index.html" class="brand-wrapper">
+        <img src="assets/images/logo.svg" alt="Salama Estates Logo" class="brand-logo">
+        <div class="brand-text">
+          <h1>Salama Estates</h1>
+          <span>Public Information Portal</span>
+        </div>
+      </a>
+
+      <button class="menu-toggle" aria-label="Toggle navigation" aria-expanded="false">&#9776;</button>
+
+      <nav>
+        <ul class="nav-links">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="overview.html">Overview</a></li>
+          <li><a href="transparency.html">Transparency</a></li>
+          <li><a href="owners.html">For Owners</a></li>
+          <li><a href="roadmap.html">Roadmap</a></li>
+          <li><a href="faq.html">FAQ</a></li>
+          <li><a href="news/index.html">News</a></li>
+          <li><a href="contact.html" class="nav-btn active">Contact Us</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-inner">
+      <div class="hero-badge-row">
+        <span class="badge-tag badge-primary">📬 Official Inquiries</span>
+        <span class="badge-tag badge-status">Desk Open</span>
+        <span class="badge-tag badge-date">Support &amp; Verification</span>
+      </div>
+
+      <h1 class="hero-title">Contact Us &amp; Agency Verification</h1>
+      <p class="hero-lead">
+        Whether you are a real estate agency applying for credentials, a property owner wishing to publish listings, or a visitor with a question, our dedicated team is here to assist.
+      </p>
+    </div>
+  </section>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="content-grid">
+
+      <article class="article-body">
+
+        <!-- Specialized Desks -->
+        <section id="desks">
+          <h2>Official Channels</h2>
+          
+          <div class="checklist-grid">
+            <div class="check-item">
+              <span class="check-icon">🏢</span>
+              <div>
+                <strong>Agency Verification Program:</strong>
+                <p style="font-size: 0.88rem; color: var(--slate-600); margin-top: 4px;">
+                  For brokerage firms, certified property agencies, and licensed Realtors. Early enrollment for October 2026 certification.
+                </p>
+              </div>
+            </div>
+
+            <div class="check-item">
+              <span class="check-icon">🔑</span>
+              <div>
+                <strong>Property Owner Support:</strong>
+                <p style="font-size: 0.88rem; color: var(--slate-600); margin-top: 4px;">
+                  Assistance with listing creation, photo optimization, pricing updates, and dashboard access.
+                </p>
+              </div>
+            </div>
+
+            <div class="check-item">
+              <span class="check-icon">🛡️</span>
+              <div>
+                <strong>Data Correction &amp; Claims:</strong>
+                <p style="font-size: 0.88rem; color: var(--slate-600); margin-top: 4px;">
+                  Submit listing corrections, status updates, or claim ownership of an existing public property profile.
+                </p>
+              </div>
+            </div>
+
+            <div class="check-item">
+              <span class="check-icon">💬</span>
+              <div>
+                <strong>General Community Inquiries:</strong>
+                <p style="font-size: 0.88rem; color: var(--slate-600); margin-top: 4px;">
+                  Questions regarding marketplace usage, partnerships, privacy, and public feedback.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Interactive Inquiry Form -->
+        <section id="inquiry-form-section">
+          <h2>Send an Official Inquiry</h2>
+          <div class="search-filter-card" style="padding: 28px; margin-top: 16px;">
+            <form id="contact-form" onsubmit="handleContactSubmit(event)">
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+                <div>
+                  <label for="contact-name" style="display: block; font-size: 0.88rem; font-weight: 600; color: var(--slate-800); margin-bottom: 6px;">Full Name *</label>
+                  <input type="text" id="contact-name" class="search-input" style="padding-left: 14px;" placeholder="e.g. Sarah Jenkins" required>
+                </div>
+                <div>
+                  <label for="contact-email" style="display: block; font-size: 0.88rem; font-weight: 600; color: var(--slate-800); margin-bottom: 6px;">Email Address *</label>
+                  <input type="email" id="contact-email" class="search-input" style="padding-left: 14px;" placeholder="name@domain.com" required>
+                </div>
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+                <div>
+                  <label for="contact-phone" style="display: block; font-size: 0.88rem; font-weight: 600; color: var(--slate-800); margin-bottom: 6px;">Phone / WhatsApp</label>
+                  <input type="tel" id="contact-phone" class="search-input" style="padding-left: 14px;" placeholder="+1 (555) 000-0000">
+                </div>
+                <div>
+                  <label for="inquiry-type" style="display: block; font-size: 0.88rem; font-weight: 600; color: var(--slate-800); margin-bottom: 6px;">Inquiry Department *</label>
+                  <select id="inquiry-type" class="search-input" style="padding-left: 14px;" required>
+                    <option value="agency">Agency Verification Program (Oct 2026)</option>
+                    <option value="owner">Property Owner / Direct Listing</option>
+                    <option value="correction">Data Correction or Listing Claim</option>
+                    <option value="general">General Marketplace Inquiry</option>
+                  </select>
+                </div>
+              </div>
+
+              <div style="margin-bottom: 20px;">
+                <label for="contact-message" style="display: block; font-size: 0.88rem; font-weight: 600; color: var(--slate-800); margin-bottom: 6px;">Message or Property URL *</label>
+                <textarea id="contact-message" class="search-input" style="padding: 12px 14px; min-height: 120px; resize: vertical;" placeholder="Provide details, agency credentials, or specific listing links..." required></textarea>
+              </div>
+
+              <button type="submit" class="nav-btn" style="width: 100%; padding: 12px !important; font-size: 1rem; border: none; cursor: pointer;">
+                Submit Inquiries &rarr;
+              </button>
+            </form>
+
+            <div id="contact-success" style="display: none; background: var(--green-50); border: 1px solid #bbf7d0; border-radius: var(--radius-md); padding: 18px; text-align: center; margin-top: 16px;">
+              <h4 style="color: var(--green-600); margin-bottom: 6px;">✓ Inquiry Received</h4>
+              <p style="color: var(--slate-700); font-size: 0.92rem;">
+                Thank you for contacting Salama Estates. Your submission has been routed to our verification and support desk. We typically respond within 1 business day.
+              </p>
+            </div>
+          </div>
+        </section>
+
+      </article>
+
+      <!-- Sidebar -->
+      <aside class="portal-sidebar">
+        <div class="sidebar-widget">
+          <h3 class="widget-title">📌 Information Sections</h3>
+          <ul class="sidebar-nav-list">
+            <li><a href="overview.html">Overview &amp; Mission <span>&rarr;</span></a></li>
+            <li><a href="transparency.html">Data Quality &amp; Transparency <span>&rarr;</span></a></li>
+            <li><a href="owners.html">Why Post Directly? <span>&rarr;</span></a></li>
+            <li><a href="roadmap.html">Future Vision &amp; Roadmap <span>&rarr;</span></a></li>
+            <li><a href="faq.html">Frequently Asked Questions <span>&rarr;</span></a></li>
+            <li><a href="news/index.html">Newsroom &amp; Announcements <span>&rarr;</span></a></li>
+          </ul>
+        </div>
+
+        <div class="sidebar-widget">
+          <h3 class="widget-title">⏱️ Operating Standards</h3>
+          <ul class="roadmap-summary-list">
+            <li class="roadmap-item">
+              <span class="roadmap-icon">🕒</span>
+              <div class="roadmap-text">
+                <strong>Response Window:</strong>
+                <span>Within 24 business hours</span>
+              </div>
+            </li>
+            <li class="roadmap-item">
+              <span class="roadmap-icon">🔒</span>
+              <div class="roadmap-text">
+                <strong>Privacy Protected:</strong>
+                <span>Credentials strictly verified</span>
+              </div>
+            </li>
+            <li class="roadmap-item">
+              <span class="roadmap-icon">📍</span>
+              <div class="roadmap-text">
+                <strong>Platform Status:</strong>
+                <span>Active Growth Initiative</span>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </aside>
+
+    </div>
+  </main>
+
+  <!-- Site Footer -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-bottom">
+        <div>&copy; 2026 Salama Estates. All rights reserved.</div>
+        <div>Public Information Notice &bull; GitHub Pages Static Deployment</div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/main.js"></script>
+  <script>
+    // Autofill department based on URL query param
+    const params = new URLSearchParams(window.location.search);
+    const dept = params.get('type');
+    if (dept && document.getElementById('inquiry-type')) {
+      document.getElementById('inquiry-type').value = dept;
+    }
+
+    function handleContactSubmit(e) {
+      e.preventDefault();
+      document.getElementById('contact-form').style.display = 'none';
+      document.getElementById('contact-success').style.display = 'block';
+    }
+  </script>
+</body>
+</html>

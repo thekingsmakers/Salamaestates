@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Newsroom & Official Announcements | Salama Estates</title>
+  
+  <meta name="description" content="Official platform announcements, policy updates, development roadmap, and marketplace releases from Salama Estates.">
+  <meta property="og:title" content="Newsroom & Official Announcements | Salama Estates">
+  <meta property="og:description" content="Stay informed on the latest platform initiatives, agency verification updates, and direct listing features.">
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="icon" href="../assets/images/logo.svg" type="image/svg+xml">
+</head>
+<body>
+
+  <!-- Top Announcement Bar -->
+  <aside class="top-notice-bar" aria-label="Announcement">
+    <span class="badge-live">Live Feed</span>
+    Official Public Information &amp; Marketplace Announcements
+  </aside>
+
+  <!-- Site Navigation -->
+  <header class="site-header">
+    <div class="nav-container">
+      <a href="../index.html" class="brand-wrapper">
+        <img src="../assets/images/logo.svg" alt="Salama Estates Logo" class="brand-logo">
+        <div class="brand-text">
+          <h1>Salama Estates</h1>
+          <span>Public Information Portal</span>
+        </div>
+      </a>
+
+      <button class="menu-toggle" aria-label="Toggle navigation" aria-expanded="false">&#9776;</button>
+
+      <nav>
+        <ul class="nav-links">
+          <li><a href="../index.html">Home</a></li>
+          <li><a href="../overview.html">Overview</a></li>
+          <li><a href="../transparency.html">Transparency</a></li>
+          <li><a href="../owners.html">For Owners</a></li>
+          <li><a href="../roadmap.html">Roadmap</a></li>
+          <li><a href="../faq.html">FAQ</a></li>
+          <li><a href="index.html" class="active">News</a></li>
+          <li><a href="../contact.html" class="nav-btn">Contact Us</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-inner">
+      <div class="hero-badge-row">
+        <span class="badge-tag badge-primary">📰 Official Newsroom</span>
+        <span class="badge-tag badge-status">Real-Time Updates</span>
+        <span class="badge-tag badge-date">Continuous Public Disclosures</span>
+      </div>
+
+      <h1 class="hero-title">Platform News &amp; Announcements</h1>
+      <p class="hero-lead">
+        Transparent updates, technical releases, platform roadmap milestones, and community announcements directly from the Salama Estates administration.
+      </p>
+
+      <!-- Search & Category Filters -->
+      <div class="search-filter-card">
+        <div class="search-input-wrapper">
+          <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input
+            type="text"
+            id="news-search-input"
+            class="search-input"
+            placeholder="Search announcements, policies, or topics..."
+            aria-label="Search news articles"
+          >
+        </div>
+
+        <div class="filter-chips">
+          <button class="chip active" data-category="all" type="button">All Updates</button>
+          <button class="chip" data-category="Platform Development" type="button">Platform Development</button>
+          <button class="chip" data-category="Agency" type="button">Agencies &amp; Verification</button>
+          <button class="chip" data-category="Owners" type="button">Property Owners</button>
+          <button class="chip" data-category="Roadmap" type="button">Roadmap</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content Area -->
+  <main class="main-content">
+    <div class="content-grid">
+
+      <!-- Left Column: Dynamic News List -->
+      <section>
+        <div class="section-heading-row">
+          <h2 class="section-title">
+            <span>📢 Latest Communiques</span>
+          </h2>
+          <span id="news-count-display" style="font-size: 0.88rem; color: var(--slate-500); font-weight: 500;">
+            Loading updates...
+          </span>
+        </div>
+
+        <!-- News articles container automatically populated via fetch -->
+        <div id="news-articles-container" class="news-card-list">
+          <!-- Fallback or dynamic content injected by assets/js/news-fetcher.js -->
+          <div class="article-card featured-card">
+            <div class="card-meta-top">
+              <span class="card-category">Platform Development</span>
+              <span class="article-date">📅 September 2026 • 5 min read</span>
+            </div>
+            <h3 class="card-title">
+              <a href="platform-launch-initiative/index.html">
+                Platform Launch Initiative: Building the Largest Property Marketplace
+              </a>
+            </h3>
+            <p class="card-summary">
+              As part of our mission to create a comprehensive and trusted real estate marketplace, we have introduced a temporary property data acquisition strategy to provide users with meaningful and valuable content from day one.
+            </p>
+            <div class="card-footer">
+              <span class="official-stamp">✓ Active Platform Growth Initiative</span>
+              <a class="card-read-more" href="platform-launch-initiative/index.html">
+                Read Full Statement &rarr;
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Informational Callout Box -->
+        <div class="info-alert-box" style="margin-top: 32px;">
+          <div class="info-alert-icon">💡</div>
+          <div class="info-alert-text">
+            <h3>Automated News Discovery</h3>
+            <p>
+              This portal automatically discovers and indexes newly published HTML news files. Every news item has its own independent <code>index.html</code> folder containing verified metadata, reading time, and official disclaimers.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Column: Sidebar Navigation & Roadmap -->
+      <aside class="portal-sidebar">
+
+        <div class="sidebar-widget">
+          <h3 class="widget-title">📌 Navigation &amp; Topics</h3>
+          <ul class="sidebar-nav-list">
+            <li><a href="../overview.html">Platform Overview <span>&rarr;</span></a></li>
+            <li><a href="../transparency.html">Data Accuracy &amp; Quality <span>&rarr;</span></a></li>
+            <li><a href="../owners.html">Why Post Directly? <span>&rarr;</span></a></li>
+            <li><a href="../roadmap.html">Full Growth Roadmap <span>&rarr;</span></a></li>
+            <li><a href="../faq.html">Public Frequently Asked Questions <span>&rarr;</span></a></li>
+            <li><a href="../contact.html">Agency Verification Desk <span>&rarr;</span></a></li>
+          </ul>
+        </div>
+
+        <div class="sidebar-widget">
+          <h3 class="widget-title">🚀 Roadmap Highlights</h3>
+          <ul class="roadmap-summary-list">
+            <li class="roadmap-item">
+              <span class="roadmap-icon">✅</span>
+              <div class="roadmap-text">
+                <strong>September 2026</strong>
+                <span>Property Marketplace Launch</span>
+              </div>
+            </li>
+            <li class="roadmap-item">
+              <span class="roadmap-icon">⏳</span>
+              <div class="roadmap-text">
+                <strong>October 2026</strong>
+                <span>Agency Verification Program</span>
+              </div>
+            </li>
+            <li class="roadmap-item">
+              <span class="roadmap-icon">🔜</span>
+              <div class="roadmap-text">
+                <strong>Coming Soon</strong>
+                <span>Direct Listing Portal</span>
+              </div>
+            </li>
+            <li class="roadmap-item">
+              <span class="roadmap-icon">🔜</span>
+              <div class="roadmap-text">
+                <strong>Coming Soon</strong>
+                <span>Property Analytics Dashboard</span>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <div class="sidebar-widget" style="background: var(--teal-50); border-color: var(--teal-200);">
+          <h3 class="widget-title" style="color: var(--teal-900);">🏢 Are You an Agency?</h3>
+          <p style="font-size: 0.9rem; color: var(--teal-800); line-height: 1.5; margin-bottom: 14px;">
+            Get early access to our Agency Verification Program. Certified agencies receive verified badges, priority leads, and portfolio management tools.
+          </p>
+          <a href="../contact.html?type=agency" class="nav-btn" style="display: block; text-align: center;">
+            Apply for Verification
+          </a>
+        </div>
+
+      </aside>
+
+    </div>
+  </main>
+
+  <!-- Site Footer -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-grid">
+        <div class="footer-col">
+          <h4>Salama Estates Newsroom</h4>
+          <p>
+            Official communication portal, transparency registry, and public announcements for the Salama Estates real estate marketplace.
+          </p>
+        </div>
+
+        <div class="footer-col">
+          <h4>Information</h4>
+          <ul class="footer-links">
+            <li><a href="../overview.html">Platform Overview</a></li>
+            <li><a href="../transparency.html">Data Transparency</a></li>
+            <li><a href="../owners.html">Owner &amp; Agent Guides</a></li>
+            <li><a href="../roadmap.html">Future Roadmap</a></li>
+            <li><a href="../faq.html">Public FAQ</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Newsroom</h4>
+          <ul class="footer-links">
+            <li><a href="index.html">All Announcements</a></li>
+            <li><a href="platform-launch-initiative/index.html">Platform Launch Initiative</a></li>
+            <li><a href="../roadmap.html">Upcoming Milestones</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Support &amp; Inquiries</h4>
+          <ul class="footer-links">
+            <li><a href="../contact.html">Contact Us</a></li>
+            <li><a href="../contact.html?type=agency">Agency Verification</a></li>
+            <li><a href="../transparency.html">Privacy &amp; Terms</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>&copy; 2026 Salama Estates. All rights reserved.</div>
+        <div>Public Information Notice &bull; GitHub Pages Static Deployment</div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="../assets/js/main.js"></script>
+  <script src="../assets/js/news-fetcher.js"></script>
+</body>
+</html>
