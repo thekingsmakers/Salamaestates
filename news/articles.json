@@ -1,5 +1,32 @@
 [
   {
+    "id": "test",
+    "slug": "test",
+    "path": "news/test/index.html",
+    "title": "test",
+    "category": "Platform Development",
+    "categorySlug": "platform-development",
+    "date": "October 2026",
+    "isoDate": "2026-09-24T14:50:06.737Z",
+    "readTime": "4 min read",
+    "badge": "Official Announcement",
+    "status": "Active Communication",
+    "summary": "test",
+    "quote": "ss",
+    "image": "test",
+    "gallery": [],
+    "sections": [
+      {
+        "heading": "ss",
+        "body": "ss"
+      }
+    ],
+    "tags": [
+      "Platform Development",
+      "Announcement"
+    ]
+  },
+  {
     "id": "policy-and-standards",
     "slug": "policy-and-standards",
     "path": "news/policy-and-standards/index.html",
